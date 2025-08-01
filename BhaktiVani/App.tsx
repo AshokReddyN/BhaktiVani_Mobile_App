@@ -11,11 +11,11 @@ import { ReaderProvider } from './src/contexts/ReaderContext';
 import RootNavigator from './src/navigation/RootNavigator';
 
 const AppContent: React.FC = () => {
-  const { isDark } = useThemeContext();
-  const theme = getCurrentTheme(isDark);
+  const { theme, isDark } = useThemeContext();
+  const currentTheme = getCurrentTheme(theme);
 
   return (
-    <PaperProvider theme={theme}>
+    <PaperProvider theme={currentTheme}>
       <SafeAreaProvider>
         <NavigationContainer>
           <RootNavigator />

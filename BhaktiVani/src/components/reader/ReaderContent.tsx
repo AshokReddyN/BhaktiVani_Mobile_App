@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { useLanguageContext } from '../../contexts/LanguageContext';
 import { useReaderContext } from '../../contexts/ReaderContext';
+import { useThemeContext } from '../../constants/theme';
 import { getFontForLanguage, fontSizes, lineHeights, letterSpacing } from '../../constants/fonts';
 import { ReaderSettings } from '../../contexts/ReaderContext';
 
@@ -22,6 +23,7 @@ const ReaderContent: React.FC<ReaderContentProps> = ({
   const theme = useTheme();
   const { currentLanguage } = useLanguageContext();
   const { settings } = useReaderContext();
+  const { isDark, isSepia } = useThemeContext();
 
   // Use preview settings if provided, otherwise use context settings
   const activeSettings = previewSettings || settings;
@@ -42,44 +44,13 @@ const ReaderContent: React.FC<ReaderContentProps> = ({
 
   const contentBlocks = parseContent(content);
 
-  const getThemeColors = () => {
-    switch (activeSettings.theme) {
-      case 'sepia':
-        return {
-          background: '#FDF6E3',
-          text: '#2C1810',
-          surface: '#F5F0E0',
-        };
-      case 'white':
-        return {
-          background: '#FFFFFF',
-          text: '#000000',
-          surface: '#F5F5F5',
-        };
-      case 'dark':
-        return {
-          background: '#1A1A1A',
-          text: '#E0E0E0',
-          surface: '#2D2D2D',
-        };
-      default:
-        return {
-          background: theme.colors.background,
-          text: theme.colors.onSurface,
-          surface: theme.colors.surface,
-        };
-    }
-  };
-
-  const themeColors = getThemeColors();
-
   const textStyle = {
     fontSize,
     lineHeight: fontSize * lineHeight,
     letterSpacing: letterSpacingValue,
     fontFamily: fontConfig.family,
     fontWeight: fontConfig.weight as 'normal' | 'bold' | '100' | '200' | '300' | '400' | '500' | '600' | '700' | '800' | '900',
-    color: themeColors.text,
+    color: theme.colors.onSurface,
     textAlign: activeSettings.justifyText ? 'justify' : 'left' as 'auto' | 'left' | 'right' | 'center' | 'justify',
   };
 
@@ -89,7 +60,7 @@ const ReaderContent: React.FC<ReaderContentProps> = ({
     return (
       <View key={index} style={styles.contentBlock}>
         {activeSettings.showLineNumbers && (
-          <Text style={[styles.lineNumber, { color: themeColors.text }]}>
+          <Text style={[styles.lineNumber, { color: theme.colors.onSurface }]}>
             {lineNumber}
           </Text>
         )}
@@ -102,16 +73,16 @@ const ReaderContent: React.FC<ReaderContentProps> = ({
 
   return (
     <ScrollView 
-      style={[styles.container, { backgroundColor: themeColors.background }]}
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
       contentContainerStyle={styles.contentContainer}
       showsVerticalScrollIndicator={false}
     >
       {/* Title Section */}
       <View style={styles.titleSection}>
-        <Text style={[styles.title, { color: themeColors.text }]}>
+        <Text style={[styles.title, { color: theme.colors.onSurface }]}>
           {title}
         </Text>
-        <Text style={[styles.nativeTitle, { color: themeColors.text }]}>
+        <Text style={[styles.nativeTitle, { color: theme.colors.onSurface }]}>
           {nativeTitle}
         </Text>
       </View>
@@ -123,7 +94,7 @@ const ReaderContent: React.FC<ReaderContentProps> = ({
 
       {/* End of content indicator */}
       <View style={styles.endIndicator}>
-        <Text style={[styles.endText, { color: themeColors.text }]}>
+        <Text style={[styles.endText, { color: theme.colors.onSurface }]}>
           • • •
         </Text>
       </View>

@@ -6,46 +6,57 @@ export const colors = {
   primary: {
     light: '#FF6B35',
     dark: '#FF8A65',
+    sepia: '#A97142',
   },
   secondary: {
     light: '#4A90E2',
     dark: '#64B5F6',
+    sepia: '#C9A66B',
   },
   background: {
     light: '#FFFFFF',
     dark: '#121212',
+    sepia: '#F4ECD8',
   },
   surface: {
     light: '#F5F5F5',
     dark: '#1E1E1E',
+    sepia: '#E9DFCA',
   },
   text: {
     light: '#212121',
     dark: '#FFFFFF',
+    sepia: '#5B4636',
   },
   textSecondary: {
     light: '#757575',
     dark: '#B0B0B0',
+    sepia: '#A97142',
   },
   accent: {
     light: '#FFD700',
     dark: '#FFEB3B',
+    sepia: '#FFD180',
   },
   error: {
     light: '#F44336',
     dark: '#EF5350',
+    sepia: '#B85C38',
   },
   success: {
     light: '#4CAF50',
     dark: '#66BB6A',
+    sepia: '#A3B18A',
   },
   warning: {
     light: '#FF9800',
     dark: '#FFB74D',
+    sepia: '#FFB74D',
   },
   info: {
     light: '#2196F3',
     dark: '#42A5F5',
+    sepia: '#A1C6EA',
   },
 };
 
@@ -155,13 +166,30 @@ export const darkTheme = {
   },
 };
 
+export const sepiaTheme = {
+  ...MD3LightTheme,
+  colors: {
+    ...MD3LightTheme.colors,
+    primary: colors.primary.sepia,
+    secondary: colors.secondary.sepia,
+    background: colors.background.sepia,
+    surface: colors.surface.sepia,
+    text: colors.text.sepia,
+    onSurface: colors.text.sepia,
+    onBackground: colors.text.sepia,
+    accent: colors.accent.sepia,
+  },
+};
+
 // Theme Context
-type ThemeType = 'light' | 'dark';
+type ThemeType = 'light' | 'dark' | 'sepia';
 
 interface ThemeContextType {
   theme: ThemeType;
+  setTheme: (mode: ThemeType) => void;
   toggleTheme: () => void;
   isDark: boolean;
+  isSepia: boolean;
   isLoading: boolean;
 }
 
@@ -180,7 +208,7 @@ interface ThemeProviderProps {
 }
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  const [theme, setTheme] = useState<ThemeType>('light');
+  const [theme, setThemeState] = useState<ThemeType>('light');
   const [isLoading, setIsLoading] = useState(true);
 
   // Load theme settings from storage on mount
@@ -188,8 +216,8 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     const loadThemeSettings = async () => {
       try {
         const savedTheme = await storageService.getThemeSettings();
-        if (savedTheme) {
-          setTheme(savedTheme);
+        if (savedTheme === 'light' || savedTheme === 'dark' || savedTheme === 'sepia') {
+          setThemeState(savedTheme);
         }
       } catch (error) {
         console.error('Failed to load theme settings:', error);
@@ -201,28 +229,43 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     loadThemeSettings();
   }, []);
 
-  const toggleTheme = async () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
+  const setTheme = async (mode: ThemeType) => {
+    setThemeState(mode);
     
     // Save to storage
     try {
-      await storageService.saveThemeSettings(newTheme);
+      await storageService.saveThemeSettings(mode);
     } catch (error) {
       console.error('Failed to save theme settings:', error);
     }
   };
 
+  // Cycles through light -> dark -> sepia -> light
+  const toggleTheme = async () => {
+    let newTheme: ThemeType;
+    if (theme === 'light') newTheme = 'dark';
+    else if (theme === 'dark') newTheme = 'sepia';
+    else newTheme = 'light';
+    await setTheme(newTheme);
+  };
+
   const isDark = theme === 'dark';
+  const isSepia = theme === 'sepia';
 
   const value = {
     theme,
+    setTheme,
     toggleTheme,
     isDark,
+    isSepia,
     isLoading,
   };
 
   return React.createElement(ThemeContext.Provider, { value }, children);
 };
 
-export const getCurrentTheme = (isDark: boolean) => isDark ? darkTheme : lightTheme; 
+export const getCurrentTheme = (theme: ThemeType) => {
+  if (theme === 'dark') return darkTheme;
+  if (theme === 'sepia') return sepiaTheme;
+  return lightTheme;
+}; 

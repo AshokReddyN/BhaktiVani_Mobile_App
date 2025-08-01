@@ -1,14 +1,20 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { useTheme, Switch, List, Divider } from 'react-native-paper';
+import { useTheme, List, Divider, RadioButton } from 'react-native-paper';
 import { useThemeContext } from '../../constants/theme';
 import { useLanguageContext } from '../../contexts/LanguageContext';
 import { SUPPORTED_LANGUAGES } from '../../constants/languages';
 
 const SettingsScreen: React.FC = () => {
   const theme = useTheme();
-  const { isDark, toggleTheme } = useThemeContext();
+  const { theme: currentTheme, setTheme, isDark, isSepia } = useThemeContext();
   const { selectedLanguage, setSelectedLanguage, currentLanguage } = useLanguageContext();
+
+  const themeOptions = [
+    { value: 'light', label: 'Light Mode', icon: 'white-balance-sunny', description: 'Bright theme for daytime reading' },
+    { value: 'dark', label: 'Dark Mode', icon: 'moon-waning-crescent', description: 'Dark theme for low-light environments' },
+    { value: 'sepia', label: 'Warm Mode', icon: 'palette', description: 'Sepia theme for reduced eye strain' },
+  ];
 
   return (
     <ScrollView 
@@ -27,20 +33,35 @@ const SettingsScreen: React.FC = () => {
           Appearance
         </Text>
         
-        <List.Item
-          title="Dark Mode"
-          description="Toggle between light and dark themes"
-          left={(props) => <List.Icon {...props} icon="theme-light-dark" />}
-          right={() => (
-            <Switch
-              value={isDark}
-              onValueChange={toggleTheme}
-              color={theme.colors.primary}
-            />
-          )}
-          titleStyle={[styles.listItemTitle, { color: theme.colors.onSurface }]}
-          descriptionStyle={[styles.listItemDescription, { color: theme.colors.onSurface }]}
-        />
+        {themeOptions.map((option) => (
+          <List.Item
+            key={option.value}
+            title={option.label}
+            description={option.description}
+            left={(props) => <List.Icon {...props} icon={option.icon} />}
+            right={() => (
+              <RadioButton
+                value={option.value}
+                status={currentTheme === option.value ? 'checked' : 'unchecked'}
+                onPress={() => setTheme(option.value as 'light' | 'dark' | 'sepia')}
+                color={theme.colors.primary}
+              />
+            )}
+            titleStyle={[
+              styles.listItemTitle, 
+              { 
+                color: currentTheme === option.value 
+                  ? theme.colors.primary 
+                  : theme.colors.onSurface 
+              }
+            ]}
+            descriptionStyle={[styles.listItemDescription, { color: theme.colors.onSurface }]}
+            style={[
+              styles.themeItem,
+              currentTheme === option.value && { backgroundColor: theme.colors.primaryContainer }
+            ]}
+          />
+        ))}
       </View>
 
       <Divider style={styles.divider} />
@@ -144,6 +165,11 @@ const styles = StyleSheet.create({
   },
   listItemDescription: {
     fontSize: 14,
+  },
+  themeItem: {
+    marginHorizontal: 8,
+    marginVertical: 2,
+    borderRadius: 8,
   },
   languageItem: {
     marginHorizontal: 8,

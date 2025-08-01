@@ -68,7 +68,7 @@ class StorageService {
   }
 
   // Theme Settings
-  async saveThemeSettings(theme: 'light' | 'dark'): Promise<void> {
+  async saveThemeSettings(theme: 'light' | 'dark' | 'sepia'): Promise<void> {
     try {
       await this.init();
       await AsyncStorage.setItem('selectedTheme', theme);
@@ -77,10 +77,10 @@ class StorageService {
     }
   }
 
-  async getThemeSettings(): Promise<'light' | 'dark' | null> {
+  async getThemeSettings(): Promise<'light' | 'dark' | 'sepia' | null> {
     try {
       await this.init();
-      return await AsyncStorage.getItem('selectedTheme') as 'light' | 'dark' | null;
+      return await AsyncStorage.getItem('selectedTheme') as 'light' | 'dark' | 'sepia' | null;
     } catch (error) {
       console.error('Failed to get theme settings:', error);
       return null;

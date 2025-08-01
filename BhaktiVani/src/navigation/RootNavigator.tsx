@@ -14,16 +14,42 @@ const Stack = createStackNavigator();
 
 const RootNavigator: React.FC = () => {
   const theme = useTheme();
-  const { isDark } = useThemeContext();
+  const { theme: currentTheme, isDark, isSepia } = useThemeContext();
+
+  // Determine header style based on theme
+  const getHeaderStyle = () => {
+    if (isDark) {
+      return {
+        backgroundColor: theme.colors.surface,
+        borderBottomColor: theme.colors.outline,
+      };
+    } else if (isSepia) {
+      return {
+        backgroundColor: theme.colors.surface,
+        borderBottomColor: theme.colors.outline,
+      };
+    } else {
+      return {
+        backgroundColor: theme.colors.primary,
+        borderBottomColor: theme.colors.primary,
+      };
+    }
+  };
+
+  const getHeaderTintColor = () => {
+    if (isDark || isSepia) {
+      return theme.colors.onSurface;
+    } else {
+      return '#fff';
+    }
+  };
 
   return (
     <Stack.Navigator
       initialRouteName="Home"
       screenOptions={{
-        headerStyle: {
-          backgroundColor: isDark ? theme.colors.surface : theme.colors.primary,
-        },
-        headerTintColor: isDark ? theme.colors.onSurface : '#fff',
+        headerStyle: getHeaderStyle(),
+        headerTintColor: getHeaderTintColor(),
         headerTitleStyle: {
           fontWeight: 'bold',
         },
