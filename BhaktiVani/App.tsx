@@ -7,6 +7,7 @@ import { Provider as StoreProvider } from 'react-redux';
 import { store } from './src/store';
 import { ThemeProvider, useThemeContext, getCurrentTheme } from './src/constants/theme';
 import { LanguageProvider } from './src/contexts/LanguageContext';
+import { ReaderProvider } from './src/contexts/ReaderContext';
 import RootNavigator from './src/navigation/RootNavigator';
 
 const AppContent: React.FC = () => {
@@ -30,7 +31,9 @@ export default function App() {
     <StoreProvider store={store}>
       <ThemeProvider>
         <LanguageProvider>
-          <AppContent />
+          <ReaderProvider>
+            <AppContent />
+          </ReaderProvider>
         </LanguageProvider>
       </ThemeProvider>
     </StoreProvider>

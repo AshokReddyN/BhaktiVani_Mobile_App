@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useTheme, Searchbar, Card, Chip } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
 import { useLanguageContext } from '../../contexts/LanguageContext';
 import { stotraService } from '../../services/stotraService';
 import StotraList from '../../components/stotra/StotraList';
 
 const LibraryScreen: React.FC = () => {
   const theme = useTheme();
+  const navigation = useNavigation();
   const { selectedLanguage, currentLanguage } = useLanguageContext();
   const [searchQuery, setSearchQuery] = useState('');
   const [showCategories, setShowCategories] = useState(true);
@@ -17,6 +19,11 @@ const LibraryScreen: React.FC = () => {
     setSearchQuery(query);
     // Hide categories when searching
     setShowCategories(query.length === 0);
+  };
+
+  const handleStotraPress = (_stotraId: string) => {
+    // Navigate to reader with the selected stotra
+    navigation.navigate('Reader' as never);
   };
 
   return (
@@ -113,6 +120,7 @@ const LibraryScreen: React.FC = () => {
         <StotraList 
           showCategories={showCategories}
           searchQuery={searchQuery}
+          onStotraPress={handleStotraPress}
         />
       </View>
     </ScrollView>

@@ -9,12 +9,14 @@ interface StotraListProps {
   showCategories?: boolean;
   showFavorites?: boolean;
   searchQuery?: string;
+  onStotraPress?: (stotraId: string) => void;
 }
 
 const StotraList: React.FC<StotraListProps> = ({ 
   showCategories = true, 
   showFavorites = false,
-  searchQuery = ''
+  searchQuery = '',
+  onStotraPress
 }) => {
   const theme = useTheme();
   const { selectedLanguage } = useLanguageContext();
@@ -41,7 +43,10 @@ const StotraList: React.FC<StotraListProps> = ({
   const groupedStotras = stotraService.getStotrasGroupedByCategory(selectedLanguage);
 
   const renderStotraItem = ({ item }: { item: Stotra }) => (
-    <Card style={[styles.stotraCard, { backgroundColor: theme.colors.surface }]}>
+    <Card 
+      style={[styles.stotraCard, { backgroundColor: theme.colors.surface }]}
+      onPress={() => onStotraPress?.(item.id)}
+    >
       <Card.Content>
         <View style={styles.stotraHeader}>
           <View style={styles.stotraInfo}>
