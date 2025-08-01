@@ -152,5 +152,3 @@ export const darkTheme = {
     onBackground: colors.text.dark,
   },
 };
-
-export const theme = lightTheme; // Default to light theme 
