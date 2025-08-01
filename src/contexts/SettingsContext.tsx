@@ -1,11 +1,14 @@
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 
 export type Theme = 'light' | 'dark' | 'sepia';
+export type FontFamily = 'serif' | 'sans-serif'; // Example font families
 
 interface Settings {
   fontSize: number;
   theme: Theme;
-  // Add other settings like fontFamily, margins, etc. here
+  lineHeight: number;
+  margin: number;
+  fontFamily: FontFamily;
 }
 
 interface SettingsContextType {
@@ -14,8 +17,11 @@ interface SettingsContextType {
 }
 
 const defaultSettings: Settings = {
-  fontSize: 18,
+  fontSize: 20, // Increased default for better readability
   theme: 'light',
+  lineHeight: 1.6, // Relative line height
+  margin: 20, // Horizontal padding in pixels
+  fontFamily: 'serif',
 };
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);

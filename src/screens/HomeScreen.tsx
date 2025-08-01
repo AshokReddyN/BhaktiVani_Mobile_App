@@ -1,13 +1,19 @@
 import React from 'react';
 import { View, Text, Button, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useFavorites } from '../contexts/FavoritesContext';
-import { ALL_STOTRAS, CATEGORIES } from '../assets/data/sample_data';
+import { ALL_STOTRAS } from '../assets/data/sample_data';
 import { Stotra } from '../types/data';
+import { RootStackParamList } from '../navigation/RootNavigator';
+
+type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
 const HomeScreen = () => {
   const { language, setLanguage, availableLanguages } = useLanguage();
   const { favorites, toggleFavorite, isFavorite } = useFavorites();
+  const navigation = useNavigation<HomeScreenNavigationProp>();
 
   const filteredStotras = ALL_STOTRAS.filter(s => s.languageId === language);
   const favoriteStotras = filteredStotras.filter(s => favorites.includes(s.id));
@@ -17,6 +23,7 @@ const HomeScreen = () => {
     <TouchableOpacity
       style={styles.itemContainer}
       onLongPress={() => toggleFavorite(item.id)}
+      onPress={() => navigation.navigate('Reader', { stotraId: item.id })}
     >
       <Text style={styles.itemTitle}>{isFavorite(item.id) ? '★ ' : ''}{item.title}</Text>
     </TouchableOpacity>
@@ -52,13 +59,14 @@ const HomeScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 50,
+    paddingTop: 20, // Reduced padding to give more space
     backgroundColor: '#f5f5f5',
   },
   languageSwitcher: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    paddingBottom: 10,
+    paddingVertical: 10,
+    backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
   },
