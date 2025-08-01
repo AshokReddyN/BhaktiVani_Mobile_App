@@ -1,5 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
+import themeSlice from './slices/themeSlice';
 
 // Import slices here when created
 // import authSlice from './slices/authSlice';
@@ -8,6 +9,7 @@ import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 
 export const store = configureStore({
   reducer: {
+    theme: themeSlice,
     // Add slices here when created
     // auth: authSlice,
     // reader: readerSlice,
