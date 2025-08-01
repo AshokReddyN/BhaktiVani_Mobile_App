@@ -1,6 +1,7 @@
 import React from 'react';
-import { createStackNavigator, TransitionPresets } from '@react-navigation/stack';
+import { createStackNavigator } from '@react-navigation/stack';
 import { useTheme } from 'react-native-paper';
+import { useThemeContext } from '../constants/theme';
 
 // Import screens
 import HomeScreen from '../screens/home/HomeScreen';
@@ -8,33 +9,43 @@ import ReaderScreen from '../screens/reader/ReaderScreen';
 import SettingsScreen from '../screens/settings/SettingsScreen';
 import FavoritesScreen from '../screens/favorites/FavoritesScreen';
 
-export type RootStackParamList = {
-  Home: undefined;
-  Reader: undefined;
-  Settings: undefined;
-  Favorites: undefined;
-};
-
-const Stack = createStackNavigator<RootStackParamList>();
+const Stack = createStackNavigator();
 
 const RootNavigator: React.FC = () => {
   const theme = useTheme();
+  const { isDark } = useThemeContext();
 
   return (
     <Stack.Navigator
       initialRouteName="Home"
       screenOptions={{
         headerStyle: {
-          backgroundColor: theme.colors.primary,
+          backgroundColor: isDark ? theme.colors.surface : theme.colors.primary,
         },
-        headerTintColor: '#fff',
+        headerTintColor: isDark ? theme.colors.onSurface : '#fff',
         headerTitleStyle: {
           fontWeight: 'bold',
         },
-        // Modern slide animation
-        ...TransitionPresets.SlideFromRightIOS,
-        gestureEnabled: true,
-        gestureDirection: 'horizontal',
+        cardStyle: {
+          backgroundColor: theme.colors.background,
+        },
+        // Add smooth animations
+        transitionSpec: {
+          open: {
+            animation: 'timing',
+            config: {
+              duration: 300,
+              easing: require('react-native').Easing.inOut(require('react-native').Easing.ease),
+            },
+          },
+          close: {
+            animation: 'timing',
+            config: {
+              duration: 300,
+              easing: require('react-native').Easing.inOut(require('react-native').Easing.ease),
+            },
+          },
+        },
       }}
     >
       <Stack.Screen 
@@ -42,46 +53,31 @@ const RootNavigator: React.FC = () => {
         component={HomeScreen} 
         options={{ 
           title: 'BhaktiVani',
-          headerStyle: {
-            backgroundColor: theme.colors.primary,
-            elevation: 4,
-          },
+          headerShown: true,
         }} 
       />
-      
       <Stack.Screen 
         name="Reader" 
         component={ReaderScreen} 
         options={{ 
-          title: 'Text Reader',
-          headerStyle: {
-            backgroundColor: theme.colors.primary,
-            elevation: 4,
-          },
+          title: 'Reader',
+          headerShown: true,
         }} 
       />
-      
       <Stack.Screen 
         name="Settings" 
         component={SettingsScreen} 
         options={{ 
           title: 'Settings',
-          headerStyle: {
-            backgroundColor: theme.colors.primary,
-            elevation: 4,
-          },
+          headerShown: true,
         }} 
       />
-      
       <Stack.Screen 
         name="Favorites" 
         component={FavoritesScreen} 
         options={{ 
           title: 'Favorites',
-          headerStyle: {
-            backgroundColor: theme.colors.primary,
-            elevation: 4,
-          },
+          headerShown: true,
         }} 
       />
     </Stack.Navigator>

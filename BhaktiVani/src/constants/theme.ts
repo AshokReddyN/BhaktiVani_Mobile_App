@@ -1,4 +1,6 @@
+import React from 'react';
 import { MD3LightTheme, MD3DarkTheme } from 'react-native-paper';
+import { createContext, useContext, useState, ReactNode } from 'react';
 
 export const colors = {
   primary: {
@@ -153,4 +155,45 @@ export const darkTheme = {
   },
 };
 
-export const theme = lightTheme; // Default to light theme 
+// Theme Context
+type ThemeType = 'light' | 'dark';
+
+interface ThemeContextType {
+  theme: ThemeType;
+  toggleTheme: () => void;
+  isDark: boolean;
+}
+
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+
+export const useThemeContext = () => {
+  const context = useContext(ThemeContext);
+  if (!context) {
+    throw new Error('useThemeContext must be used within a ThemeProvider');
+  }
+  return context;
+};
+
+interface ThemeProviderProps {
+  children: ReactNode;
+}
+
+export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
+  const [theme, setTheme] = useState<ThemeType>('light');
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  };
+
+  const isDark = theme === 'dark';
+
+  const value = {
+    theme,
+    toggleTheme,
+    isDark,
+  };
+
+  return React.createElement(ThemeContext.Provider, { value }, children);
+};
+
+export const getCurrentTheme = (isDark: boolean) => isDark ? darkTheme : lightTheme; 

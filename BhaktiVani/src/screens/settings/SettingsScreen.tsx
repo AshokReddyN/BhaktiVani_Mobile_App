@@ -1,158 +1,107 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { useTheme, Button, Card, List, Switch, Divider } from 'react-native-paper';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { useAppDispatch, useAppSelector } from '../../store';
-import { saveTheme, ThemeMode } from '../../store/slices/themeSlice';
-
-type RootStackParamList = {
-  Home: undefined;
-  Reader: undefined;
-  Settings: undefined;
-  Favorites: undefined;
-};
+import { useTheme, Switch, List, Divider } from 'react-native-paper';
+import { useThemeContext } from '../../constants/theme';
+import { useLanguageContext } from '../../contexts/LanguageContext';
+import { SUPPORTED_LANGUAGES } from '../../constants/languages';
 
 const SettingsScreen: React.FC = () => {
   const theme = useTheme();
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const dispatch = useAppDispatch();
-  const { mode, isDark } = useAppSelector((state) => state.theme);
-
-  const handleThemeToggle = () => {
-    const newMode: ThemeMode = isDark ? 'light' : 'dark';
-    dispatch(saveTheme(newMode));
-  };
-
-  const handleAutoTheme = () => {
-    dispatch(saveTheme('auto'));
-  };
-
-  const handleNavigateToHome = () => {
-    navigation.navigate('Home');
-  };
+  const { isDark, toggleTheme } = useThemeContext();
+  const { selectedLanguage, setSelectedLanguage, currentLanguage } = useLanguageContext();
 
   return (
     <ScrollView 
       style={[styles.container, { backgroundColor: theme.colors.background }]}
       contentContainerStyle={styles.contentContainer}
     >
-      <Card style={[styles.card, { backgroundColor: theme.colors.surface }]}>
-        <Card.Content>
-          <Text style={[styles.title, { color: theme.colors.primary }]}>
-            Settings
-          </Text>
-          <Text style={[styles.subtitle, { color: theme.colors.onSurface }]}>
-            Customize your app experience
-          </Text>
-        </Card.Content>
-      </Card>
+      <View style={styles.header}>
+        <Text style={[styles.title, { color: theme.colors.primary }]}>
+          Settings
+        </Text>
+      </View>
 
-      <Card style={[styles.card, { backgroundColor: theme.colors.surface }]}>
-        <Card.Content>
-          <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>
-            Appearance
-          </Text>
-          
-          <List.Item
-            title="Dark Mode"
-            description={`Currently using ${mode} theme`}
-            left={props => <List.Icon {...props} icon="palette" />}
-            right={() => (
-              <Switch
-                value={isDark && mode !== 'auto'}
-                onValueChange={handleThemeToggle}
-                disabled={mode === 'auto'}
-              />
-            )}
-          />
-          
-          <Divider />
-          
-          <List.Item
-            title="Auto Theme"
-            description="Follow system theme"
-            left={props => <List.Icon {...props} icon="brightness-auto" />}
-            right={() => (
-              <Switch
-                value={mode === 'auto'}
-                onValueChange={handleAutoTheme}
-              />
-            )}
-          />
-        </Card.Content>
-      </Card>
+      {/* Theme Settings */}
+      <View style={[styles.section, { backgroundColor: theme.colors.surface }]}>
+        <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>
+          Appearance
+        </Text>
+        
+        <List.Item
+          title="Dark Mode"
+          description="Toggle between light and dark themes"
+          left={(props) => <List.Icon {...props} icon="theme-light-dark" />}
+          right={() => (
+            <Switch
+              value={isDark}
+              onValueChange={toggleTheme}
+              color={theme.colors.primary}
+            />
+          )}
+          titleStyle={[styles.listItemTitle, { color: theme.colors.onSurface }]}
+          descriptionStyle={[styles.listItemDescription, { color: theme.colors.onSurface }]}
+        />
+      </View>
 
-      <Card style={[styles.card, { backgroundColor: theme.colors.surface }]}>
-        <Card.Content>
-          <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>
-            Reading Preferences
-          </Text>
-          
-          <List.Item
-            title="Font Size"
-            description="Medium"
-            left={props => <List.Icon {...props} icon="format-font-size-increase" />}
-            right={props => <List.Icon {...props} icon="chevron-right" />}
-          />
-          
-          <Divider />
-          
-          <List.Item
-            title="Language"
-            description="Kannada, Sanskrit, Telugu"
-            left={props => <List.Icon {...props} icon="translate" />}
-            right={props => <List.Icon {...props} icon="chevron-right" />}
-          />
-          
-          <Divider />
-          
-          <List.Item
-            title="Offline Storage"
-            description="Manage downloaded texts"
-            left={props => <List.Icon {...props} icon="download" />}
-            right={props => <List.Icon {...props} icon="chevron-right" />}
-          />
-        </Card.Content>
-      </Card>
+      <Divider style={styles.divider} />
 
-      <Card style={[styles.card, { backgroundColor: theme.colors.surface }]}>
-        <Card.Content>
-          <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>
-            About
-          </Text>
-          
-          <List.Item
-            title="Version"
-            description="1.0.0"
-            left={props => <List.Icon {...props} icon="information" />}
-          />
-          
-          <Divider />
-          
-          <List.Item
-            title="Privacy Policy"
-            left={props => <List.Icon {...props} icon="shield-account" />}
-            right={props => <List.Icon {...props} icon="chevron-right" />}
-          />
-          
-          <Divider />
-          
-          <List.Item
-            title="Terms of Service"
-            left={props => <List.Icon {...props} icon="file-document" />}
-            right={props => <List.Icon {...props} icon="chevron-right" />}
-          />
-        </Card.Content>
-      </Card>
+      {/* Language Settings */}
+      <View style={[styles.section, { backgroundColor: theme.colors.surface }]}>
+        <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>
+          Language
+        </Text>
+        
+        <Text style={[styles.currentLanguage, { color: theme.colors.onSurface }]}>
+          Current: {currentLanguage.nativeName} ({currentLanguage.name})
+        </Text>
 
-      <View style={styles.buttonContainer}>
-        <Button 
-          mode="contained" 
-          onPress={handleNavigateToHome}
-          style={styles.button}
-        >
-          Back to Home
-        </Button>
+        {SUPPORTED_LANGUAGES.map((language) => (
+          <List.Item
+            key={language.id}
+            title={`${language.flag} ${language.nativeName}`}
+            description={language.name}
+            left={(props) => <List.Icon {...props} icon="translate" />}
+            onPress={() => setSelectedLanguage(language.id)}
+            titleStyle={[
+              styles.listItemTitle, 
+              { 
+                color: selectedLanguage === language.id 
+                  ? theme.colors.primary 
+                  : theme.colors.onSurface 
+              }
+            ]}
+            descriptionStyle={[styles.listItemDescription, { color: theme.colors.onSurface }]}
+            style={[
+              styles.languageItem,
+              selectedLanguage === language.id && { backgroundColor: theme.colors.primaryContainer }
+            ]}
+          />
+        ))}
+      </View>
+
+      <Divider style={styles.divider} />
+
+      {/* App Info */}
+      <View style={[styles.section, { backgroundColor: theme.colors.surface }]}>
+        <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>
+          About
+        </Text>
+        
+        <List.Item
+          title="BhaktiVani"
+          description="Version 1.0.0"
+          left={(props) => <List.Icon {...props} icon="information" />}
+          titleStyle={[styles.listItemTitle, { color: theme.colors.onSurface }]}
+          descriptionStyle={[styles.listItemDescription, { color: theme.colors.onSurface }]}
+        />
+        
+        <List.Item
+          title="Offline Access"
+          description="All texts available offline"
+          left={(props) => <List.Icon {...props} icon="wifi-off" />}
+          titleStyle={[styles.listItemTitle, { color: theme.colors.onSurface }]}
+          descriptionStyle={[styles.listItemDescription, { color: theme.colors.onSurface }]}
+        />
       </View>
     </ScrollView>
   );
@@ -163,35 +112,46 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentContainer: {
+    flexGrow: 1,
     padding: 16,
   },
-  card: {
-    margin: 8,
-    elevation: 4,
-    marginBottom: 16,
+  header: {
+    marginBottom: 24,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 8,
   },
-  subtitle: {
-    fontSize: 18,
-    textAlign: 'center',
-    marginBottom: 8,
+  section: {
+    marginBottom: 16,
+    borderRadius: 12,
+    overflow: 'hidden',
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  buttonContainer: {
     padding: 16,
-    alignItems: 'center',
+    paddingBottom: 8,
   },
-  button: {
-    minWidth: 200,
+  currentLanguage: {
+    fontSize: 14,
+    paddingHorizontal: 16,
+    paddingBottom: 8,
+  },
+  listItemTitle: {
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  listItemDescription: {
+    fontSize: 14,
+  },
+  languageItem: {
+    marginHorizontal: 8,
+    marginVertical: 2,
+    borderRadius: 8,
+  },
+  divider: {
+    marginVertical: 8,
   },
 });
 

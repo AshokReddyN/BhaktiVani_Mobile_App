@@ -1,81 +1,164 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { useTheme, Button } from 'react-native-paper';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
-
-type RootStackParamList = {
-  Home: undefined;
-  Reader: undefined;
-  Settings: undefined;
-  Favorites: undefined;
-};
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { useTheme, Button, Card, Chip } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
+import { useLanguageContext } from '../../contexts/LanguageContext';
+import { SUPPORTED_LANGUAGES } from '../../constants/languages';
 
 const HomeScreen: React.FC = () => {
   const theme = useTheme();
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const navigation = useNavigation();
+  const { selectedLanguage, setSelectedLanguage, currentLanguage } = useLanguageContext();
 
-  const handleNavigateToReader = () => {
-    navigation.navigate('Reader');
+  const handleStartReading = () => {
+    navigation.navigate('Reader' as never);
   };
 
-  const handleNavigateToFavorites = () => {
-    navigation.navigate('Favorites');
+  const handleViewFavorites = () => {
+    navigation.navigate('Favorites' as never);
   };
 
-  const handleNavigateToSettings = () => {
-    navigation.navigate('Settings');
+  const handleOpenSettings = () => {
+    navigation.navigate('Settings' as never);
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <Text style={[styles.title, { color: theme.colors.primary }]}>
-        Welcome to BhaktiVani
-      </Text>
-      <Text style={[styles.subtitle, { color: theme.colors.onSurface }]}>
-        Your gateway to Hindu devotional texts
-      </Text>
-      <Text style={[styles.description, { color: theme.colors.onSurface }]}>
-        Access sacred texts in Kannada, Sanskrit, and Telugu with offline reading capabilities.
-      </Text>
-      
-      <View style={styles.buttonContainer}>
-        <Button 
-          mode="contained" 
-          onPress={handleNavigateToReader}
-          style={styles.button}
-          icon="book-open"
-        >
-          Start Reading
-        </Button>
-        
-        <Button 
-          mode="outlined" 
-          onPress={handleNavigateToFavorites}
-          style={styles.button}
-          icon="heart"
-        >
-          My Favorites
-        </Button>
-        
-        <Button 
-          mode="outlined" 
-          onPress={handleNavigateToSettings}
-          style={styles.button}
-          icon="cog"
-        >
-          Settings
-        </Button>
+    <ScrollView 
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+      contentContainerStyle={styles.contentContainer}
+    >
+      <View style={styles.header}>
+        <Text style={[styles.title, { color: theme.colors.primary }]}>
+          Welcome to BhaktiVani
+        </Text>
+        <Text style={[styles.subtitle, { color: theme.colors.onSurface }]}>
+          Your gateway to Hindu devotional texts
+        </Text>
       </View>
-    </View>
+
+      {/* Language Selection */}
+      <Card style={[styles.card, { backgroundColor: theme.colors.surface }]}>
+        <Card.Content>
+          <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>
+            Select Language
+          </Text>
+          <Text style={[styles.sectionDescription, { color: theme.colors.onSurface }]}>
+            Choose your preferred language for reading devotional texts
+          </Text>
+          
+          <View style={styles.languageContainer}>
+            {SUPPORTED_LANGUAGES.map((language) => (
+              <Chip
+                key={language.id}
+                selected={selectedLanguage === language.id}
+                onPress={() => setSelectedLanguage(language.id)}
+                style={[
+                  styles.languageChip,
+                  selectedLanguage === language.id && { 
+                    backgroundColor: theme.colors.primaryContainer 
+                  }
+                ]}
+                textStyle={[
+                  styles.languageChipText,
+                  selectedLanguage === language.id && { 
+                    color: theme.colors.onPrimaryContainer 
+                  }
+                ]}
+              >
+                {language.flag} {language.nativeName}
+              </Chip>
+            ))}
+          </View>
+          
+          <View style={styles.currentLanguageInfo}>
+            <Text style={[styles.currentLanguageText, { color: theme.colors.onSurface }]}>
+              Current: {currentLanguage.nativeName} ({currentLanguage.name})
+            </Text>
+          </View>
+        </Card.Content>
+      </Card>
+
+      {/* Quick Actions */}
+      <Card style={[styles.card, { backgroundColor: theme.colors.surface }]}>
+        <Card.Content>
+          <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>
+            Quick Actions
+          </Text>
+          
+          <View style={styles.actionButtons}>
+            <Button
+              mode="contained"
+              icon="book-open"
+              style={[styles.actionButton, { backgroundColor: theme.colors.primary }]}
+              contentStyle={styles.buttonContent}
+              onPress={handleStartReading}
+            >
+              Start Reading
+            </Button>
+            
+            <Button
+              mode="outlined"
+              icon="heart"
+              style={styles.actionButton}
+              contentStyle={styles.buttonContent}
+              onPress={handleViewFavorites}
+            >
+              View Favorites
+            </Button>
+            
+            <Button
+              mode="outlined"
+              icon="cog"
+              style={styles.actionButton}
+              contentStyle={styles.buttonContent}
+              onPress={handleOpenSettings}
+            >
+              Settings
+            </Button>
+          </View>
+        </Card.Content>
+      </Card>
+
+      {/* Features */}
+      <Card style={[styles.card, { backgroundColor: theme.colors.surface }]}>
+        <Card.Content>
+          <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>
+            Features
+          </Text>
+          
+          <View style={styles.featuresList}>
+            <Text style={[styles.feature, { color: theme.colors.onSurface }]}>
+              📖 Offline Reading - Access texts without internet
+            </Text>
+            <Text style={[styles.feature, { color: theme.colors.onSurface }]}>
+              🌙 Dark/Light Mode - Comfortable reading in any light
+            </Text>
+            <Text style={[styles.feature, { color: theme.colors.onSurface }]}>
+              🔤 Multi-language Support - Kannada, Sanskrit, Telugu
+            </Text>
+            <Text style={[styles.feature, { color: theme.colors.onSurface }]}>
+              ❤️ Favorites - Bookmark your favorite texts
+            </Text>
+            <Text style={[styles.feature, { color: theme.colors.onSurface }]}>
+              🔊 Audio Guides - Listen to recitations
+            </Text>
+          </View>
+        </Card.Content>
+      </Card>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
+  },
+  contentContainer: {
+    flexGrow: 1,
+    padding: 16,
+  },
+  header: {
+    marginBottom: 24,
   },
   title: {
     fontSize: 28,
@@ -88,19 +171,56 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 20,
   },
-  description: {
+  card: {
+    marginBottom: 16,
+    borderRadius: 12,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  sectionDescription: {
     fontSize: 16,
-    textAlign: 'center',
+    marginBottom: 16,
+    lineHeight: 22,
+  },
+  languageContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 16,
+  },
+  languageChip: {
+    marginBottom: 8,
+  },
+  languageChipText: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  currentLanguageInfo: {
+    alignItems: 'center',
+    paddingTop: 8,
+  },
+  currentLanguageText: {
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  actionButtons: {
+    gap: 12,
+  },
+  actionButton: {
+    marginBottom: 8,
+  },
+  buttonContent: {
+    height: 48,
+  },
+  featuresList: {
+    gap: 8,
+  },
+  feature: {
+    fontSize: 16,
     lineHeight: 24,
-    marginBottom: 40,
-  },
-  buttonContainer: {
-    width: '100%',
-    maxWidth: 300,
-  },
-  button: {
-    marginVertical: 8,
-    paddingVertical: 8,
   },
 });
 

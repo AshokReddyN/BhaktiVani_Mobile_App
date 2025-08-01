@@ -1,77 +1,34 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { useTheme, Button, Card } from 'react-native-paper';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
-
-type RootStackParamList = {
-  Home: undefined;
-  Reader: undefined;
-  Settings: undefined;
-  Favorites: undefined;
-};
+import { useTheme } from 'react-native-paper';
+import { useLanguageContext } from '../../contexts/LanguageContext';
 
 const ReaderScreen: React.FC = () => {
   const theme = useTheme();
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-
-  const handleNavigateToHome = () => {
-    navigation.navigate('Home');
-  };
-
-  const handleNavigateToFavorites = () => {
-    navigation.navigate('Favorites');
-  };
+  const { currentLanguage } = useLanguageContext();
 
   return (
     <ScrollView 
       style={[styles.container, { backgroundColor: theme.colors.background }]}
       contentContainerStyle={styles.contentContainer}
     >
-      <Card style={[styles.card, { backgroundColor: theme.colors.surface }]}>
-        <Card.Content>
-          <Text style={[styles.title, { color: theme.colors.primary }]}>
-            Text Reader
-          </Text>
-          <Text style={[styles.subtitle, { color: theme.colors.onSurface }]}>
-            Read your selected devotional texts here
-          </Text>
-          <Text style={[styles.description, { color: theme.colors.onSurface }]}>
-            This screen will display the selected Hindu devotional texts with features like:
-          </Text>
-          
-          <View style={styles.featuresList}>
-            <Text style={[styles.feature, { color: theme.colors.onSurface }]}>
-              • Adjustable font size and style
-            </Text>
-            <Text style={[styles.feature, { color: theme.colors.onSurface }]}>
-              • Bookmarking capabilities
-            </Text>
-            <Text style={[styles.feature, { color: theme.colors.onSurface }]}>
-              • Offline reading support
-            </Text>
-            <Text style={[styles.feature, { color: theme.colors.onSurface }]}>
-              • Multi-language support (Kannada, Sanskrit, Telugu)
-            </Text>
-          </View>
-
-          <View style={styles.buttonContainer}>
-            <Button 
-              mode="contained" 
-              onPress={handleNavigateToHome}
-              style={styles.button}
-            >
-              Back to Home
-            </Button>
-            <Button 
-              mode="outlined" 
-              onPress={handleNavigateToFavorites}
-              style={styles.button}
-            >
-              View Favorites
-            </Button>
-          </View>
-        </Card.Content>
-      </Card>
+      <View style={styles.header}>
+        <Text style={[styles.title, { color: theme.colors.primary }]}>
+          Reader
+        </Text>
+        <Text style={[styles.languageInfo, { color: theme.colors.onSurface }]}>
+          Current Language: {currentLanguage.nativeName} ({currentLanguage.name})
+        </Text>
+      </View>
+      
+      <View style={[styles.content, { backgroundColor: theme.colors.surface }]}>
+        <Text style={[styles.placeholderText, { color: theme.colors.onSurface }]}>
+          Reader content will be displayed here based on the selected language.
+        </Text>
+        <Text style={[styles.languageText, { color: theme.colors.onSurface }]}>
+          Selected: {currentLanguage.nativeName}
+        </Text>
+      </View>
     </ScrollView>
   );
 };
@@ -81,44 +38,37 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentContainer: {
+    flexGrow: 1,
     padding: 16,
   },
-  card: {
-    margin: 8,
-    elevation: 4,
+  header: {
+    marginBottom: 24,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    textAlign: 'center',
     marginBottom: 8,
   },
-  subtitle: {
+  languageInfo: {
+    fontSize: 16,
+    marginBottom: 16,
+  },
+  content: {
+    flex: 1,
+    padding: 20,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  placeholderText: {
     fontSize: 18,
     textAlign: 'center',
     marginBottom: 16,
   },
-  description: {
-    fontSize: 16,
-    lineHeight: 24,
-    marginBottom: 16,
-  },
-  featuresList: {
-    marginBottom: 24,
-  },
-  feature: {
-    fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 4,
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    flexWrap: 'wrap',
-  },
-  button: {
-    marginHorizontal: 4,
-    marginVertical: 4,
+  languageText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
 });
 
