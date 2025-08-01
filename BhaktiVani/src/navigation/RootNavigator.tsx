@@ -8,6 +8,7 @@ import HomeScreen from '../screens/home/HomeScreen';
 import ReaderScreen from '../screens/reader/ReaderScreen';
 import SettingsScreen from '../screens/settings/SettingsScreen';
 import FavoritesScreen from '../screens/favorites/FavoritesScreen';
+import LibraryScreen from '../screens/library/LibraryScreen';
 
 const Stack = createStackNavigator();
 
@@ -53,6 +54,14 @@ const RootNavigator: React.FC = () => {
         component={HomeScreen} 
         options={{ 
           title: 'BhaktiVani',
+          headerShown: true,
+        }} 
+      />
+      <Stack.Screen 
+        name="Library" 
+        component={LibraryScreen} 
+        options={{ 
+          title: 'Library',
           headerShown: true,
         }} 
       />

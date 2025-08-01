@@ -1,15 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { useTheme, Card } from 'react-native-paper';
+import { useTheme, Searchbar, Card, Chip } from 'react-native-paper';
 import { useLanguageContext } from '../../contexts/LanguageContext';
 import { stotraService } from '../../services/stotraService';
 import StotraList from '../../components/stotra/StotraList';
 
-const FavoritesScreen: React.FC = () => {
+const LibraryScreen: React.FC = () => {
   const theme = useTheme();
   const { selectedLanguage, currentLanguage } = useLanguageContext();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showCategories, setShowCategories] = useState(true);
 
-  const favoriteStotras = stotraService.getFavoriteStotras(selectedLanguage);
+  const languageStats = stotraService.getLanguageStats(selectedLanguage);
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    // Hide categories when searching
+    setShowCategories(query.length === 0);
+  };
 
   return (
     <ScrollView 
@@ -18,23 +26,31 @@ const FavoritesScreen: React.FC = () => {
     >
       <View style={styles.header}>
         <Text style={[styles.title, { color: theme.colors.primary }]}>
-          Favorites
+          Library
         </Text>
         <Text style={[styles.subtitle, { color: theme.colors.onSurface }]}>
-          Your bookmarked devotional texts in {currentLanguage.nativeName}
+          {currentLanguage.nativeName} ({currentLanguage.name})
         </Text>
       </View>
 
-      {/* Favorites Stats */}
+      {/* Language Stats */}
       <Card style={[styles.statsCard, { backgroundColor: theme.colors.surface }]}>
         <Card.Content>
           <Text style={[styles.statsTitle, { color: theme.colors.primary }]}>
-            Your Favorites
+            Your Progress
           </Text>
-          <View style={styles.statsRow}>
+          <View style={styles.statsGrid}>
             <View style={styles.statItem}>
               <Text style={[styles.statNumber, { color: theme.colors.primary }]}>
-                {favoriteStotras.length}
+                {languageStats.totalStotras}
+              </Text>
+              <Text style={[styles.statLabel, { color: theme.colors.onSurface }]}>
+                Total Texts
+              </Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={[styles.statNumber, { color: theme.colors.primary }]}>
+                {languageStats.favoriteStotras}
               </Text>
               <Text style={[styles.statLabel, { color: theme.colors.onSurface }]}>
                 Favorites
@@ -42,7 +58,7 @@ const FavoritesScreen: React.FC = () => {
             </View>
             <View style={styles.statItem}>
               <Text style={[styles.statNumber, { color: theme.colors.primary }]}>
-                {favoriteStotras.filter(s => s.readingProgress === 100).length}
+                {languageStats.completedStotras}
               </Text>
               <Text style={[styles.statLabel, { color: theme.colors.onSurface }]}>
                 Completed
@@ -50,11 +66,7 @@ const FavoritesScreen: React.FC = () => {
             </View>
             <View style={styles.statItem}>
               <Text style={[styles.statNumber, { color: theme.colors.primary }]}>
-                {Math.round(
-                  favoriteStotras.length > 0 
-                    ? favoriteStotras.reduce((sum, s) => sum + s.readingProgress, 0) / favoriteStotras.length 
-                    : 0
-                )}%
+                {Math.round(languageStats.averageProgress)}%
               </Text>
               <Text style={[styles.statLabel, { color: theme.colors.onSurface }]}>
                 Avg Progress
@@ -64,11 +76,43 @@ const FavoritesScreen: React.FC = () => {
         </Card.Content>
       </Card>
 
-      {/* Favorites List */}
+      {/* Search Bar */}
+      <View style={styles.searchContainer}>
+        <Searchbar
+          placeholder="Search stotras..."
+          onChangeText={handleSearch}
+          value={searchQuery}
+          style={[styles.searchBar, { backgroundColor: theme.colors.surface }]}
+          iconColor={theme.colors.onSurface}
+          inputStyle={{ color: theme.colors.onSurface }}
+        />
+      </View>
+
+      {/* View Options */}
+      {!searchQuery && (
+        <View style={styles.viewOptions}>
+          <Chip
+            selected={showCategories}
+            onPress={() => setShowCategories(true)}
+            style={styles.viewChip}
+          >
+            By Category
+          </Chip>
+          <Chip
+            selected={!showCategories}
+            onPress={() => setShowCategories(false)}
+            style={styles.viewChip}
+          >
+            All Texts
+          </Chip>
+        </View>
+      )}
+
+      {/* Stotra List */}
       <View style={styles.listContainer}>
         <StotraList 
-          showCategories={false}
-          showFavorites={true}
+          showCategories={showCategories}
+          searchQuery={searchQuery}
         />
       </View>
     </ScrollView>
@@ -92,7 +136,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 18,
   },
   statsCard: {
     marginBottom: 20,
@@ -103,12 +147,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 16,
   },
-  statsRow: {
+  statsGrid: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
   },
   statItem: {
     alignItems: 'center',
+    width: '48%',
+    marginBottom: 16,
   },
   statNumber: {
     fontSize: 24,
@@ -119,9 +166,24 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textAlign: 'center',
   },
+  searchContainer: {
+    marginBottom: 16,
+  },
+  searchBar: {
+    borderRadius: 12,
+    elevation: 2,
+  },
+  viewOptions: {
+    flexDirection: 'row',
+    marginBottom: 16,
+    gap: 8,
+  },
+  viewChip: {
+    flex: 1,
+  },
   listContainer: {
     flex: 1,
   },
 });
 
-export default FavoritesScreen;
+export default LibraryScreen; 

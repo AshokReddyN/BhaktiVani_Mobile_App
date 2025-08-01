@@ -11,7 +11,7 @@ const HomeScreen: React.FC = () => {
   const { selectedLanguage, setSelectedLanguage, currentLanguage } = useLanguageContext();
 
   const handleStartReading = () => {
-    navigation.navigate('Reader' as never);
+    navigation.navigate('Library' as never);
   };
 
   const handleViewFavorites = () => {
@@ -88,12 +88,12 @@ const HomeScreen: React.FC = () => {
           <View style={styles.actionButtons}>
             <Button
               mode="contained"
-              icon="book-open"
+              icon="library"
               style={[styles.actionButton, { backgroundColor: theme.colors.primary }]}
               contentStyle={styles.buttonContent}
               onPress={handleStartReading}
             >
-              Start Reading
+              Browse Library
             </Button>
             
             <Button
