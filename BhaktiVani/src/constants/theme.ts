@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { MD3LightTheme, MD3DarkTheme } from 'react-native-paper';
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { storageService } from '../services/storageService';
 
 export const colors = {
   primary: {
@@ -162,6 +162,7 @@ interface ThemeContextType {
   theme: ThemeType;
   toggleTheme: () => void;
   isDark: boolean;
+  isLoading: boolean;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -180,9 +181,36 @@ interface ThemeProviderProps {
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const [theme, setTheme] = useState<ThemeType>('light');
+  const [isLoading, setIsLoading] = useState(true);
 
-  const toggleTheme = () => {
-    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  // Load theme settings from storage on mount
+  useEffect(() => {
+    const loadThemeSettings = async () => {
+      try {
+        const savedTheme = await storageService.getThemeSettings();
+        if (savedTheme) {
+          setTheme(savedTheme);
+        }
+      } catch (error) {
+        console.error('Failed to load theme settings:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadThemeSettings();
+  }, []);
+
+  const toggleTheme = async () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    
+    // Save to storage
+    try {
+      await storageService.saveThemeSettings(newTheme);
+    } catch (error) {
+      console.error('Failed to save theme settings:', error);
+    }
   };
 
   const isDark = theme === 'dark';
@@ -191,6 +219,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     theme,
     toggleTheme,
     isDark,
+    isLoading,
   };
 
   return React.createElement(ThemeContext.Provider, { value }, children);

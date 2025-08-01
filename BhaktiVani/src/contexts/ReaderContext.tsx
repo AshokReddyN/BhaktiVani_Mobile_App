@@ -1,7 +1,8 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { fontSizes, lineHeights, letterSpacing } from '../constants/fonts';
+import { storageService } from '../services/storageService';
 
-interface ReaderSettings {
+export interface ReaderSettings {
   fontSize: keyof typeof fontSizes;
   lineHeight: keyof typeof lineHeights;
   letterSpacing: keyof typeof letterSpacing;
@@ -15,6 +16,7 @@ interface ReaderContextType {
   settings: ReaderSettings;
   updateSettings: (newSettings: Partial<ReaderSettings>) => void;
   resetSettings: () => void;
+  isLoading: boolean;
 }
 
 const defaultSettings: ReaderSettings = {
@@ -43,19 +45,54 @@ interface ReaderProviderProps {
 
 export const ReaderProvider: React.FC<ReaderProviderProps> = ({ children }) => {
   const [settings, setSettings] = useState<ReaderSettings>(defaultSettings);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const updateSettings = (newSettings: Partial<ReaderSettings>) => {
-    setSettings(prev => ({ ...prev, ...newSettings }));
+  // Load settings from storage on mount
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const savedSettings = await storageService.getReaderSettings();
+        if (savedSettings) {
+          setSettings(savedSettings);
+        }
+      } catch (error) {
+        console.error('Failed to load reader settings:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadSettings();
+  }, []);
+
+  const updateSettings = async (newSettings: Partial<ReaderSettings>) => {
+    const updatedSettings = { ...settings, ...newSettings };
+    setSettings(updatedSettings);
+    
+    // Save to storage
+    try {
+      await storageService.saveReaderSettings(updatedSettings);
+    } catch (error) {
+      console.error('Failed to save reader settings:', error);
+    }
   };
 
-  const resetSettings = () => {
+  const resetSettings = async () => {
     setSettings(defaultSettings);
+    
+    // Save to storage
+    try {
+      await storageService.saveReaderSettings(defaultSettings);
+    } catch (error) {
+      console.error('Failed to save reader settings:', error);
+    }
   };
 
   const value = {
     settings,
     updateSettings,
     resetSettings,
+    isLoading,
   };
 
   return (

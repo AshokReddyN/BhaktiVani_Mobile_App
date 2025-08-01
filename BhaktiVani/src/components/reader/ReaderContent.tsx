@@ -4,26 +4,36 @@ import { useTheme } from 'react-native-paper';
 import { useLanguageContext } from '../../contexts/LanguageContext';
 import { useReaderContext } from '../../contexts/ReaderContext';
 import { getFontForLanguage, fontSizes, lineHeights, letterSpacing } from '../../constants/fonts';
+import { ReaderSettings } from '../../contexts/ReaderContext';
 
 interface ReaderContentProps {
   content: string;
   title: string;
   nativeTitle: string;
+  previewSettings?: ReaderSettings;
 }
 
-const ReaderContent: React.FC<ReaderContentProps> = ({ content, title, nativeTitle }) => {
+const ReaderContent: React.FC<ReaderContentProps> = ({ 
+  content, 
+  title, 
+  nativeTitle, 
+  previewSettings 
+}) => {
   const theme = useTheme();
   const { currentLanguage } = useLanguageContext();
   const { settings } = useReaderContext();
 
+  // Use preview settings if provided, otherwise use context settings
+  const activeSettings = previewSettings || settings;
+
   const fontConfig = getFontForLanguage(currentLanguage.id);
-  const fontSize = fontSizes[settings.fontSize];
-  const lineHeight = lineHeights[settings.lineHeight];
-  const letterSpacingValue = letterSpacing[settings.letterSpacing];
+  const fontSize = fontSizes[activeSettings.fontSize];
+  const lineHeight = lineHeights[activeSettings.lineHeight];
+  const letterSpacingValue = letterSpacing[activeSettings.letterSpacing];
 
   // Parse content into paragraphs or lines based on layout setting
   const parseContent = (text: string): string[] => {
-    if (settings.layout === 'line-by-line') {
+    if (activeSettings.layout === 'line-by-line') {
       return text.split('\n').filter(line => line.trim().length > 0);
     } else {
       return text.split('\n\n').filter(paragraph => paragraph.trim().length > 0);
@@ -33,7 +43,7 @@ const ReaderContent: React.FC<ReaderContentProps> = ({ content, title, nativeTit
   const contentBlocks = parseContent(content);
 
   const getThemeColors = () => {
-    switch (settings.theme) {
+    switch (activeSettings.theme) {
       case 'sepia':
         return {
           background: '#FDF6E3',
@@ -70,15 +80,15 @@ const ReaderContent: React.FC<ReaderContentProps> = ({ content, title, nativeTit
     fontFamily: fontConfig.family,
     fontWeight: fontConfig.weight as 'normal' | 'bold' | '100' | '200' | '300' | '400' | '500' | '600' | '700' | '800' | '900',
     color: themeColors.text,
-    textAlign: settings.justifyText ? 'justify' : 'left' as 'auto' | 'left' | 'right' | 'center' | 'justify',
+    textAlign: activeSettings.justifyText ? 'justify' : 'left' as 'auto' | 'left' | 'right' | 'center' | 'justify',
   };
 
   const renderContentBlock = (block: string, index: number) => {
-    const lineNumber = settings.showLineNumbers ? index + 1 : null;
+    const lineNumber = activeSettings.showLineNumbers ? index + 1 : null;
 
     return (
       <View key={index} style={styles.contentBlock}>
-        {settings.showLineNumbers && (
+        {activeSettings.showLineNumbers && (
           <Text style={[styles.lineNumber, { color: themeColors.text }]}>
             {lineNumber}
           </Text>
