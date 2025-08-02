@@ -1,12 +1,14 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useTheme, List, Divider, RadioButton } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
 import { useThemeContext } from '../../constants/theme';
 import { useLanguageContext } from '../../contexts/LanguageContext';
 import { SUPPORTED_LANGUAGES } from '../../constants/languages';
 
 const SettingsScreen: React.FC = () => {
   const theme = useTheme();
+  const navigation = useNavigation();
   const { theme: currentTheme, setTheme, isDark, isSepia } = useThemeContext();
   const { selectedLanguage, setSelectedLanguage, currentLanguage } = useLanguageContext();
 
@@ -15,6 +17,10 @@ const SettingsScreen: React.FC = () => {
     { value: 'dark', label: 'Dark Mode', icon: 'moon-waning-crescent', description: 'Dark theme for low-light environments' },
     { value: 'sepia', label: 'Warm Mode', icon: 'palette', description: 'Sepia theme for reduced eye strain' },
   ];
+
+  const handleOpenDownloadScreen = () => {
+    navigation.navigate('Download' as never);
+  };
 
   return (
     <ScrollView 
@@ -62,6 +68,24 @@ const SettingsScreen: React.FC = () => {
             ]}
           />
         ))}
+      </View>
+
+      <Divider style={styles.divider} />
+
+      {/* Offline Content Settings */}
+      <View style={[styles.section, { backgroundColor: theme.colors.surface }]}>
+        <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>
+          Offline Content
+        </Text>
+        
+        <List.Item
+          title="Download Content"
+          description="Download stotras for offline reading"
+          left={(props) => <List.Icon {...props} icon="download" />}
+          onPress={handleOpenDownloadScreen}
+          titleStyle={[styles.listItemTitle, { color: theme.colors.onSurface }]}
+          descriptionStyle={[styles.listItemDescription, { color: theme.colors.onSurface }]}
+        />
       </View>
 
       <Divider style={styles.divider} />

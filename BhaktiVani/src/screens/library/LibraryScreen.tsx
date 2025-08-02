@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { useTheme, Searchbar, Card, Chip } from 'react-native-paper';
+import { useTheme, Searchbar, Card, Chip, ActivityIndicator } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { useLanguageContext } from '../../contexts/LanguageContext';
 import { stotraService } from '../../services/stotraService';
@@ -12,8 +12,24 @@ const LibraryScreen: React.FC = () => {
   const { selectedLanguage, currentLanguage } = useLanguageContext();
   const [searchQuery, setSearchQuery] = useState('');
   const [showCategories, setShowCategories] = useState(true);
+  const [languageStats, setLanguageStats] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const languageStats = stotraService.getLanguageStats(selectedLanguage);
+  useEffect(() => {
+    loadLanguageStats();
+  }, [selectedLanguage]);
+
+  const loadLanguageStats = async () => {
+    try {
+      setIsLoading(true);
+      const stats = await stotraService.getLanguageStats(selectedLanguage);
+      setLanguageStats(stats);
+    } catch (error) {
+      console.error('Error loading language stats:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -25,6 +41,19 @@ const LibraryScreen: React.FC = () => {
     // Navigate to reader with the selected stotra
     navigation.navigate('Reader' as never);
   };
+
+  if (isLoading) {
+    return (
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+          <Text style={[styles.loadingText, { color: theme.colors.onSurface }]}>
+            Loading library...
+          </Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <ScrollView 
@@ -41,47 +70,49 @@ const LibraryScreen: React.FC = () => {
       </View>
 
       {/* Language Stats */}
-      <Card style={[styles.statsCard, { backgroundColor: theme.colors.surface }]}>
-        <Card.Content>
-          <Text style={[styles.statsTitle, { color: theme.colors.primary }]}>
-            Your Progress
-          </Text>
-          <View style={styles.statsGrid}>
-            <View style={styles.statItem}>
-              <Text style={[styles.statNumber, { color: theme.colors.primary }]}>
-                {languageStats.totalStotras}
-              </Text>
-              <Text style={[styles.statLabel, { color: theme.colors.onSurface }]}>
-                Total Texts
-              </Text>
+      {languageStats && (
+        <Card style={[styles.statsCard, { backgroundColor: theme.colors.surface }]}>
+          <Card.Content>
+            <Text style={[styles.statsTitle, { color: theme.colors.primary }]}>
+              Your Progress
+            </Text>
+            <View style={styles.statsGrid}>
+              <View style={styles.statItem}>
+                <Text style={[styles.statNumber, { color: theme.colors.primary }]}>
+                  {languageStats.totalStotras}
+                </Text>
+                <Text style={[styles.statLabel, { color: theme.colors.onSurface }]}>
+                  Total Texts
+                </Text>
+              </View>
+              <View style={styles.statItem}>
+                <Text style={[styles.statNumber, { color: theme.colors.primary }]}>
+                  {languageStats.favoriteStotras}
+                </Text>
+                <Text style={[styles.statLabel, { color: theme.colors.onSurface }]}>
+                  Favorites
+                </Text>
+              </View>
+              <View style={styles.statItem}>
+                <Text style={[styles.statNumber, { color: theme.colors.primary }]}>
+                  {languageStats.completedStotras}
+                </Text>
+                <Text style={[styles.statLabel, { color: theme.colors.onSurface }]}>
+                  Completed
+                </Text>
+              </View>
+              <View style={styles.statItem}>
+                <Text style={[styles.statNumber, { color: theme.colors.primary }]}>
+                  {Math.round(languageStats.averageProgress)}%
+                </Text>
+                <Text style={[styles.statLabel, { color: theme.colors.onSurface }]}>
+                  Avg Progress
+                </Text>
+              </View>
             </View>
-            <View style={styles.statItem}>
-              <Text style={[styles.statNumber, { color: theme.colors.primary }]}>
-                {languageStats.favoriteStotras}
-              </Text>
-              <Text style={[styles.statLabel, { color: theme.colors.onSurface }]}>
-                Favorites
-              </Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={[styles.statNumber, { color: theme.colors.primary }]}>
-                {languageStats.completedStotras}
-              </Text>
-              <Text style={[styles.statLabel, { color: theme.colors.onSurface }]}>
-                Completed
-              </Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={[styles.statNumber, { color: theme.colors.primary }]}>
-                {Math.round(languageStats.averageProgress)}%
-              </Text>
-              <Text style={[styles.statLabel, { color: theme.colors.onSurface }]}>
-                Avg Progress
-              </Text>
-            </View>
-          </View>
-        </Card.Content>
-      </Card>
+          </Card.Content>
+        </Card>
+      )}
 
       {/* Search Bar */}
       <View style={styles.searchContainer}>
@@ -145,6 +176,15 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 18,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 16,
+    marginTop: 16,
   },
   statsCard: {
     marginBottom: 20,

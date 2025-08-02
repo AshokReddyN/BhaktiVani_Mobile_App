@@ -9,6 +9,8 @@ import ReaderScreen from '../screens/reader/ReaderScreen';
 import SettingsScreen from '../screens/settings/SettingsScreen';
 import FavoritesScreen from '../screens/favorites/FavoritesScreen';
 import LibraryScreen from '../screens/library/LibraryScreen';
+import DownloadScreen from '../screens/download/DownloadScreen';
+import SearchScreen from '../screens/search/SearchScreen';
 
 const Stack = createStackNavigator();
 
@@ -112,6 +114,22 @@ const RootNavigator: React.FC = () => {
         component={FavoritesScreen} 
         options={{ 
           title: 'Favorites',
+          headerShown: true,
+        }} 
+      />
+      <Stack.Screen 
+        name="Download" 
+        component={DownloadScreen} 
+        options={{ 
+          title: 'Offline Content',
+          headerShown: true,
+        }} 
+      />
+      <Stack.Screen 
+        name="Search" 
+        component={SearchScreen} 
+        options={{ 
+          title: 'Search',
           headerShown: true,
         }} 
       />

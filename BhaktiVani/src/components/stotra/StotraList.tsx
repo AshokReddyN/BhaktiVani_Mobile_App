@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, FlatList } from 'react-native';
-import { useTheme, Card, Chip, List, IconButton, ProgressBar } from 'react-native-paper';
+import { useTheme, Card, Chip, List, IconButton, ProgressBar, ActivityIndicator } from 'react-native-paper';
 import { Stotra, StotraCategory, getCategoryInfo } from '../../types/stotra';
 import { useLanguageContext } from '../../contexts/LanguageContext';
 import { stotraService } from '../../services/stotraService';
@@ -21,26 +21,60 @@ const StotraList: React.FC<StotraListProps> = ({
   const theme = useTheme();
   const { selectedLanguage } = useLanguageContext();
   const [selectedCategory, setSelectedCategory] = useState<StotraCategory | 'all'>('all');
+  const [stotras, setStotras] = useState<Stotra[]>([]);
+  const [groupedStotras, setGroupedStotras] = useState<Record<StotraCategory, Stotra[]>>({
+    bhakti: [],
+    stotra: [],
+    mantra: [],
+    sloka: [],
+    prayer: [],
+    scripture: [],
+  });
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Get stotras based on filters
-  const getFilteredStotras = (): Stotra[] => {
-    let stotras: Stotra[];
+  useEffect(() => {
+    loadStotras();
+  }, [selectedLanguage, showFavorites, searchQuery, selectedCategory]);
 
-    if (showFavorites) {
-      stotras = stotraService.getFavoriteStotras(selectedLanguage);
-    } else if (searchQuery) {
-      stotras = stotraService.searchStotras(selectedLanguage, searchQuery);
-    } else if (selectedCategory !== 'all') {
-      stotras = stotraService.getStotrasByLanguageAndCategory(selectedLanguage, selectedCategory);
-    } else {
-      stotras = stotraService.getStotrasByLanguage(selectedLanguage);
+  const loadStotras = async () => {
+    try {
+      setIsLoading(true);
+      let loadedStotras: Stotra[] = [];
+
+      if (showFavorites) {
+        loadedStotras = await stotraService.getFavoriteStotras(selectedLanguage);
+      } else if (searchQuery) {
+        loadedStotras = await stotraService.searchStotras(selectedLanguage, searchQuery);
+      } else if (selectedCategory !== 'all') {
+        loadedStotras = await stotraService.getStotrasByLanguageAndCategory(selectedLanguage, selectedCategory);
+      } else {
+        loadedStotras = await stotraService.getStotrasByLanguage(selectedLanguage);
+      }
+
+      setStotras(loadedStotras);
+
+      // Load grouped stotras for category view
+      if (showCategories && !showFavorites && !searchQuery) {
+        const grouped = await stotraService.getStotrasGroupedByCategory(selectedLanguage);
+        setGroupedStotras(grouped);
+      }
+    } catch (error) {
+      console.error('Error loading stotras:', error);
+      setStotras([]);
+    } finally {
+      setIsLoading(false);
     }
-
-    return stotras;
   };
 
-  const stotras = getFilteredStotras();
-  const groupedStotras = stotraService.getStotrasGroupedByCategory(selectedLanguage);
+  const handleToggleFavorite = async (stotraId: string) => {
+    try {
+      await stotraService.toggleFavorite(stotraId);
+      // Reload stotras to reflect changes
+      await loadStotras();
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+    }
+  };
 
   const renderStotraItem = ({ item }: { item: Stotra }) => (
     <Card 
@@ -69,7 +103,7 @@ const StotraList: React.FC<StotraListProps> = ({
             <IconButton
               icon={item.isFavorite ? 'heart' : 'heart-outline'}
               size={24}
-              onPress={() => stotraService.toggleFavorite(item.id)}
+              onPress={() => handleToggleFavorite(item.id)}
               iconColor={item.isFavorite ? theme.colors.error : theme.colors.onSurface}
             />
           </View>
@@ -110,8 +144,8 @@ const StotraList: React.FC<StotraListProps> = ({
     </Card>
   );
 
-  const renderCategorySection = (category: StotraCategory, stotras: Stotra[]) => {
-    if (stotras.length === 0) return null;
+  const renderCategorySection = (category: StotraCategory, categoryStotras: Stotra[]) => {
+    if (categoryStotras.length === 0) return null;
 
     const categoryInfo = getCategoryInfo(category);
 
@@ -123,11 +157,11 @@ const StotraList: React.FC<StotraListProps> = ({
             {categoryInfo.name}
           </Text>
           <Text style={[styles.categoryCount, { color: theme.colors.onSurface }]}>
-            ({stotras.length})
+            ({categoryStotras.length})
           </Text>
         </View>
         <FlatList
-          data={stotras}
+          data={categoryStotras}
           renderItem={renderStotraItem}
           keyExtractor={(item) => item.id}
           scrollEnabled={false}
@@ -167,6 +201,17 @@ const StotraList: React.FC<StotraListProps> = ({
       })}
     </ScrollView>
   );
+
+  if (isLoading) {
+    return (
+      <View style={[styles.loadingContainer, { backgroundColor: theme.colors.surface }]}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+        <Text style={[styles.loadingText, { color: theme.colors.onSurface }]}>
+          Loading stotras...
+        </Text>
+      </View>
+    );
+  }
 
   if (stotras.length === 0) {
     return (
@@ -210,6 +255,18 @@ const StotraList: React.FC<StotraListProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 32,
+    margin: 16,
+    borderRadius: 12,
+  },
+  loadingText: {
+    fontSize: 16,
+    marginTop: 16,
   },
   categoryFilter: {
     marginBottom: 16,

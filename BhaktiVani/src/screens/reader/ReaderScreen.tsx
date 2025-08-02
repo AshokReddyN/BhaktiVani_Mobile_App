@@ -1,28 +1,46 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { useTheme, FAB } from 'react-native-paper';
+import { useTheme, FAB, IconButton } from 'react-native-paper';
 import { useLanguageContext } from '../../contexts/LanguageContext';
-// import { useReaderContext } from '../../contexts/ReaderContext'; // Will be used for future features
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { stotraService } from '../../services/stotraService';
+import { Stotra } from '../../types/stotra';
 import ReaderContent from '../../components/reader/ReaderContent';
 import ReaderControls from '../../components/reader/ReaderControls';
 
 const ReaderScreen: React.FC = () => {
   const theme = useTheme();
+  const navigation = useNavigation();
+  const route = useRoute();
   const { currentLanguage } = useLanguageContext();
-  // const { settings } = useReaderContext(); // Will be used for future features
   const [showControls, setShowControls] = useState(false);
+  const [currentStotra, setCurrentStotra] = useState<Stotra | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [readingProgress, setReadingProgress] = useState(0);
+  const [bookmarks, setBookmarks] = useState<number[]>([]);
+  const [showBookmarksList, setShowBookmarksList] = useState(false);
 
-  // Get a sample stotra for demonstration
-  const sampleStotras = stotraService.getStotrasByLanguage(currentLanguage.id);
-  const currentStotra = sampleStotras[0] || {
-    id: 'sample',
-    title: 'Sample Stotra',
-    nativeTitle: 'ಸ್ಯಾಂಪಲ್ ಸ್ತೋತ್ರ',
-    language: currentLanguage.id,
-    category: 'bhakti',
-    description: 'A sample devotional text for demonstration',
-    content: `ಓಂ ನಮಃ ಶಿವಾಯ
+  // Get stotra ID from route params or use sample data
+  const stotraId = route.params?.stotraId || 'sample';
+
+  useEffect(() => {
+    loadStotra();
+  }, [stotraId]);
+
+  const loadStotra = async () => {
+    try {
+      setIsLoading(true);
+      if (stotraId === 'sample') {
+        // Use sample stotra for demonstration
+        const sampleStotra: Stotra = {
+          id: 'sample',
+          title: 'Hanuman Chalisa',
+          nativeTitle: 'ಹನುಮಾನ್ ಚಾಲೀಸಾ',
+          language: currentLanguage.id,
+          category: 'bhakti',
+          author: 'Tulsidas',
+          description: 'Forty verses in praise of Hanuman',
+          content: `ಓಂ ನಮಃ ಶಿವಾಯ
 
 ಶ್ರೀ ಗುರು ಚರಣ ಸರೋಜ ರಜ ನಿಜ ಮನು ಮುಕುರ ಸುಧಾರಿ
 ಬರನೌ ರಘುಬರ ಬಿಮಲ ಯಶು ಜೋ ದಾಯಕು ಫಲ ಚಾರಿ
@@ -150,12 +168,80 @@ const ReaderScreen: React.FC = () => {
 ಹೃದಯ ಬಸಹು ಸುರ ಭೂಪ
 
 ಓಂ ನಮಃ ಶಿವಾಯ`,
-    isFavorite: false,
-    readingProgress: 0,
-    estimatedReadingTime: 15,
-    createdAt: new Date(),
-    updatedAt: new Date(),
+          isFavorite: false,
+          readingProgress: 0,
+          estimatedReadingTime: 15,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+        setCurrentStotra(sampleStotra);
+        setReadingProgress(sampleStotra.readingProgress);
+      } else {
+        // Load actual stotra from service
+        const stotra = await stotraService.getStotraById(stotraId);
+        if (stotra) {
+          setCurrentStotra(stotra);
+          setReadingProgress(stotra.readingProgress);
+        } else {
+          // Fallback to sample if stotra not found
+          console.warn(`Stotra with ID ${stotraId} not found, using sample`);
+          loadStotra(); // This will load sample
+          return;
+        }
+      }
+    } catch (error) {
+      console.error('Error loading stotra:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  const handleToggleFavorite = async () => {
+    if (!currentStotra) return;
+
+    try {
+      await stotraService.toggleFavorite(currentStotra.id);
+      // Reload stotra to get updated favorite status
+      await loadStotra();
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+    }
+  };
+
+  const handleProgressUpdate = useCallback(async (progress: number) => {
+    setReadingProgress(progress);
+    
+    // Update progress in service
+    if (currentStotra) {
+      try {
+        await stotraService.updateReadingProgress(currentStotra.id, progress);
+      } catch (error) {
+        console.error('Error updating reading progress:', error);
+      }
+    }
+  }, [currentStotra]);
+
+  const handleBookmarkToggle = useCallback((position: number) => {
+    setBookmarks(prev => {
+      if (prev.includes(position)) {
+        return prev.filter(p => p !== position);
+      } else {
+        return [...prev, position];
+      }
+    });
+  }, []);
+
+  const handleOpenControls = () => {
+    setShowControls(true);
+  };
+
+  if (isLoading || !currentStotra) {
+    return (
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+        {/* Loading state would go here */}
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -163,13 +249,26 @@ const ReaderScreen: React.FC = () => {
         content={currentStotra.content}
         title={currentStotra.title}
         nativeTitle={currentStotra.nativeTitle}
+        onProgressUpdate={handleProgressUpdate}
+        onBookmarkToggle={handleBookmarkToggle}
+        bookmarks={bookmarks}
+        readingProgress={readingProgress}
       />
       
+      {/* Favorite Button */}
+      <IconButton
+        icon={currentStotra.isFavorite ? 'star' : 'star-outline'}
+        size={28}
+        iconColor={currentStotra.isFavorite ? theme.colors.primary : theme.colors.onSurface}
+        style={[styles.favoriteButton, { backgroundColor: theme.colors.surface }]}
+        onPress={handleToggleFavorite}
+      />
+
       {/* Floating Action Button for Settings */}
       <FAB
         icon="cog"
         style={[styles.fab, { backgroundColor: theme.colors.primary }]}
-        onPress={() => setShowControls(true)}
+        onPress={handleOpenControls}
       />
 
       {/* Reader Controls Modal */}
@@ -184,6 +283,21 @@ const ReaderScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  favoriteButton: {
+    position: 'absolute',
+    margin: 16,
+    right: 0,
+    top: 0,
+    borderRadius: 20,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   fab: {
     position: 'absolute',

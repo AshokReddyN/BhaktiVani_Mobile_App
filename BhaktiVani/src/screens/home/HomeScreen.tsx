@@ -22,6 +22,10 @@ const HomeScreen: React.FC = () => {
     navigation.navigate('Settings' as never);
   };
 
+  const handleOpenSearch = () => {
+    navigation.navigate('Search' as never);
+  };
+
   return (
     <ScrollView 
       style={[styles.container, { backgroundColor: theme.colors.background }]}
@@ -88,7 +92,7 @@ const HomeScreen: React.FC = () => {
           <View style={styles.actionButtons}>
             <Button
               mode="contained"
-              icon="library"
+              icon="book-open-variant"
               style={[styles.actionButton, { backgroundColor: theme.colors.primary }]}
               contentStyle={styles.buttonContent}
               onPress={handleStartReading}
@@ -114,6 +118,16 @@ const HomeScreen: React.FC = () => {
               onPress={handleOpenSettings}
             >
               Settings
+            </Button>
+            
+            <Button
+              mode="outlined"
+              icon="magnify"
+              style={styles.actionButton}
+              contentStyle={styles.buttonContent}
+              onPress={handleOpenSearch}
+            >
+              Search
             </Button>
           </View>
         </Card.Content>
