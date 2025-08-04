@@ -209,11 +209,14 @@ class OfflineService {
    */
   async toggleFavorite(stotraId: string): Promise<void> {
     try {
+      console.log('offlineService.toggleFavorite called with ID:', stotraId);
       // Update in storage if available
       await simpleStorageService.toggleFavorite(stotraId);
+      console.log('offlineService.toggleFavorite completed successfully');
     } catch (error) {
       console.error(`Error toggling favorite for ${stotraId}:`, error);
       // In a real app, you might want to queue this for later sync
+      throw error; // Re-throw to let the caller handle it
     }
   }
 

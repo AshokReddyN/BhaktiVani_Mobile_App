@@ -76,7 +76,9 @@ class StotraService {
    * Toggle favorite status of a stotra
    */
   async toggleFavorite(stotraId: string): Promise<void> {
+    console.log('stotraService.toggleFavorite called with ID:', stotraId);
     await offlineService.toggleFavorite(stotraId);
+    console.log('stotraService.toggleFavorite completed successfully');
   }
 
   /**

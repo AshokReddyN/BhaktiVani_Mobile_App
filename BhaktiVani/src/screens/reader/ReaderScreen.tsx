@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Animated } from 'react-native';
 import { useTheme, FAB, IconButton } from 'react-native-paper';
 import { useLanguageContext } from '../../contexts/LanguageContext';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -19,9 +19,12 @@ const ReaderScreen: React.FC = () => {
   const [readingProgress, setReadingProgress] = useState(0);
   const [bookmarks, setBookmarks] = useState<number[]>([]);
   const [showBookmarksList, setShowBookmarksList] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
+  const scaleAnim = useState(new Animated.Value(1))[0];
 
-  // Get stotra ID from route params or use sample data
-  const stotraId = route.params?.stotraId || 'sample';
+  // Get stotra ID from route params
+  const stotraId = route.params?.stotraId;
 
   useEffect(() => {
     loadStotra();
@@ -30,164 +33,21 @@ const ReaderScreen: React.FC = () => {
   const loadStotra = async () => {
     try {
       setIsLoading(true);
-      if (stotraId === 'sample') {
-        // Use sample stotra for demonstration
-        const sampleStotra: Stotra = {
-          id: 'sample',
-          title: 'Hanuman Chalisa',
-          nativeTitle: 'ಹನುಮಾನ್ ಚಾಲೀಸಾ',
-          language: currentLanguage.id,
-          category: 'bhakti',
-          author: 'Tulsidas',
-          description: 'Forty verses in praise of Hanuman',
-          content: `ಓಂ ನಮಃ ಶಿವಾಯ
-
-ಶ್ರೀ ಗುರು ಚರಣ ಸರೋಜ ರಜ ನಿಜ ಮನು ಮುಕುರ ಸುಧಾರಿ
-ಬರನೌ ರಘುಬರ ಬಿಮಲ ಯಶು ಜೋ ದಾಯಕು ಫಲ ಚಾರಿ
-
-ಬುದ್ಧಿ ಹೀನ ತನು ಜಾನಿಕೆ ಸುಮಿರೌ ಪವನ ಕುಮಾರ
-ಬಲ ಬುದ್ಧಿ ಬಿದ್ಧಿ ದೇಹು ಮೋಹಿ ಹರಹು ಕಲೇಸ ಬಿಕಾರ
-
-ಜೈ ಹನುಮಾನ್ ಗ್ಯಾನ ಗುಣ ಸಾಗರ
-ಜೈ ಕಪೀಸ ತಿಹುಂ ಲೋಕ ಉಜಾಗರ
-
-ರಾಮದೂತ ಅತುಲಿತ ಬಲ ಧಾಮಾ
-ಅಂಜನಿ ಪುತ್ರ ಪವನಸುತ ನಾಮಾ
-
-ಮಹಾವೀರ ವಿಕ್ರಮ ಬಜರಂಗೀ
-ಕುಮತಿ ನಿವಾರ ಸುಮತಿ ಕೆ ಸಂಗೀ
-
-ಕಂಚನ ಬರನ ಬಿರಾಜ ಸುಬೇಸಾ
-ಕಾನನ ಕುಂಡಲ ಕುಂಚಿತ ಕೇಸಾ
-
-ಹಾಥ ಬಜ್ರ ಔಧ್ವಜಾ ಬಿರಾಜೈ
-ಕಾಂಧೆ ಮೂಂಜ ಜನೇವೂ ಸಾಜೈ
-
-ಶಂಕರ ಸುವನ ತೇಜ ಸಮಾರೋ
-ಅಪನ ತೇಜ ಸಮ್ಹಾರೋ ಆಪೇ
-
-ತೇನ ಹುಮದೇ ಯುಧ ಲಕ್ಷಣ
-ಬಿಜೇ ಸಕಲ ಜುಗ ಬೇ ಸಾಜೇ
-
-ಜೈ ಹನುಮಾನ್ ಗ್ಯಾನ ಗುಣ ಸಾಗರ
-ಜೈ ಕಪೀಸ ತಿಹುಂ ಲೋಕ ಉಜಾಗರ
-
-ಲಯ ಸಂಜೀವನ ಲಖನ ಜಿಯಾಯೇ
-ಶ್ರೀ ರಘುವೀರ ಹರಷಿ ಉರ ಲಾಯೇ
-
-ರಘುಪತಿ ಕೀನ್ಹೀ ಬಹುತ ಬಡಾಯೀ
-ತುಮ ಮಮ ಪ್ರಿಯ ಭರತ ಸಮ ಭಾಯೀ
-
-ಸಹಸ ಬದನ ತುಮ್ಹರೋ ಯಶ ಗಾವೈ
-ಅಸ ಕಹಿ ಶ್ರೀಪತಿ ಕಂಠ ಲಗಾವೈ
-
-ಸನಕಾದಿಕ ಬ್ರಹ್ಮಾದಿ ಮುನೀಶಾ
-ನಾರದ ಶಾರದ ಸಹಿತ ಅಹೀಶಾ
-
-ಯಮ ಕುಬೇರ ದಿಗ್ಪಾಲ ಜಹಾಂ ತೇ
-ಕವಿ ಕೋವಿದ ಕಹಿ ಸಕೆ ಕಹಾಂ ತೇ
-
-ತುಮ ಉಪಕಾರ ಸುಗ್ರೀವಹಿ ಕೀನ್ಹಾ
-ರಾಮ ಮಿಲಾಯ ರಾಜ ಪದ ದೀನ್ಹಾ
-
-ತುಮ್ಹರೋ ಮಂತ್ರ ವಿಭೀಷಣ ಮಾನಾ
-ಲಂಕೇಶ್ವರ ಭಯೇ ಸಬ ಜಗ ಜಾನಾ
-
-ಯುಗ ಸಹಸ್ರ ಯೋಜನ ಪರ ಭಾನೂ
-ಲೀಲ್ಯೋ ತಾಹಿ ಮಧುರ ಫಲ ಜಾನೂ
-
-ಪ್ರಭು ಮುದ್ರಿಕಾ ಮೇಲಿ ಮುಖ ಮಾಹೀ
-ಜಲಧಿ ಲಾಂಘಿ ಗಯೆ ಅಚರಜ ನಾಹೀ
-
-ದುರ್ಗಮ ಕಾಜ ಜಗತ್ ಕೆ ಜೇತೇ
-ಸುಗಮ ಅನುಗ್ರಹ ತುಮ್ಹರೆ ತೇತೇ
-
-ರಾಮ ದುಆರೆ ತುಮ ರಖವಾರೇ
-ಹೋತ ನ ಆಜ್ಞಾ ಬಿನು ಪೈಸಾರೇ
-
-ಸಬ ಸುಖ ಲಹೈ ತುಮ್ಹಾರೀ ಶರಣಾ
-ತುಮ ರಕ್ಷಕ ಕಾಹೂ ಕೋ ಡರ ನಾ
-
-ಆಪನ ತೇಜ ಸಮ್ಹಾರೋ ಆಪೇ
-ತೀನೋಂ ಲೋಕ ಹಾಕ ತೇ ಕಾಂಪೇ
-
-ಭೂತ ಪಿಶಾಚ ನಿಕಟ ನಹಿ ಆವೈ
-ಮಹಾವೀರ ಜಬ ನಾಮ ಸುನಾವೈ
-
-ನಾಸೈ ರೋಗ ಹರೈ ಸಬ ಪೀರಾ
-ಜಪತ ನಿರಂತರ ಹನುಮತ ಬೀರಾ
-
-ಸಂಕಟ ತೆ ಹನುಮಾನ್ ಛುಡಾವೈ
-ಮನ ಕ್ರಮ ಬಚನ ಧ್ಯಾನ ಜೋ ಲಾವೈ
-
-ಸಬ ಪರ ರಾಮ ತಪಸ್ವೀ ರಾಜಾ
-ತಿನಕೆ ಕಾಜ ಸಕಲ ತುಮ ಸಾಜಾ
-
-ಔರ ಮನೋರಥ ಜೋ ಕೋಯಿ ಲಾವೈ
-ತಾಸು ಅಮಿತ ಜೀವನ ಫಲ ಪಾವೈ
-
-ಚಾರೋ ಯುಗ ಪರತಾಪ ತುಮ್ಹಾರಾ
-ಹೈ ಪರಸಿದ್ಧ ಜಗತ್ ಉಜಿಯಾರಾ
-
-ಸಾಧು ಸಂತ ಕೆ ತುಮ ರಖವಾರೇ
-ಅಸುರ ನಿಕಂದನ ರಾಮ ದುಲಾರೇ
-
-ಆಷ್ಟ ಸಿದ್ಧಿ ನವ ನಿಧಿ ಕೆ ದಾತಾ
-ಅಸ ಬರ ದೀನ್ ಜಾನಕೀ ಮಾತಾ
-
-ರಾಮ ರಸಾಯನ ತುಮ್ಹಾರೇ ಪಾಸಾ
-ಸದಾ ರಹೋ ರಘುಪತಿ ಕೆ ದಾಸಾ
-
-ತುಮ್ಹರೇ ಭಜನ ರಾಮಕೋ ಪಾವೈ
-ಜನಮ ಜನಮ ಕೆ ದುಖ ಬಿಸರಾವೈ
-
-ಅಂತ ಕಾಲ ರಘುಪತಿ ಪುರ ಜಾಯೀ
-ಜಹಾಂ ಜನ್ಮ ಹರಿ ಭಕ್ತ ಕಹಾಯೀ
-
-ಔರ ದೇವತಾ ಚಿತ್ತ ನ ಧರಾಯೀ
-ಹನುಮತ್ ಸೇಯಿ ಸರ್ವ ಸುಖ ಕರಾಯೀ
-
-ಸಂಕಟ ಕಟೈ ಮಿಟೈ ಸಬ ಪೀರಾ
-ಜೋ ಸುಮಿರೈ ಹನುಮತ ಬಲಬೀರಾ
-
-ಜೈ ಜೈ ಜೈ ಹನುಮಾನ್ ಗೋಸಾಯೀ
-ಕೃಪಾ ಕರಹು ಗುರುದೇವ ಕಿ ನಾಯೀ
-
-ಜೋ ಶತ ಬಾರ ಪಾಠ ಕರ ಕೋಯೀ
-ಛೂಟಹಿ ಬಂಧಿ ಮಹಾ ಸುಖ ಹೋಯೀ
-
-ಜೋ ಯಹ ಪಢೈ ಹನುಮಾನ್ ಚಾಲೀಸಾ
-ಹೋಯ ಸಿದ್ಧಿ ಸಾಕಿ ಗೌರೀಶಾ
-
-ತುಲಸೀದಾಸ ಸದಾ ಹರಿ ಚೇರಾ
-ಕೀಜೈ ನಾಥ ಹೃದಯ ಮಹ್ ಡೇರಾ
-
-ಪವನ ತನಯ ಸಂಕಟ ಹರಣ
-ಮಂಗಲ ಮೂರತಿ ರೂಪ
-ರಾಮ ಲಖನ ಸೀತಾ ಸಹಿತ
-ಹೃದಯ ಬಸಹು ಸುರ ಭೂಪ
-
-ಓಂ ನಮಃ ಶಿವಾಯ`,
-          isFavorite: false,
-          readingProgress: 0,
-          estimatedReadingTime: 15,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
-        setCurrentStotra(sampleStotra);
-        setReadingProgress(sampleStotra.readingProgress);
+      
+      if (!stotraId) {
+        console.error('No stotra ID provided');
+        return;
+      }
+      
+      // Load actual stotra from service
+      const stotra = await stotraService.getStotraById(stotraId);
+      if (stotra) {
+        setCurrentStotra(stotra);
+        setReadingProgress(stotra.readingProgress);
+        setIsFavorite(stotra.isFavorite);
+        console.log('Loaded stotra:', stotra.title, 'Favorite status:', stotra.isFavorite);
       } else {
-        // Load actual stotra from service
-        const stotra = await stotraService.getStotraById(stotraId);
-        if (stotra) {
-          setCurrentStotra(stotra);
-          setReadingProgress(stotra.readingProgress);
-        } else {
-          // Fallback to sample if stotra not found
-          console.warn(`Stotra with ID ${stotraId} not found, using sample`);
-          loadStotra(); // This will load sample
-          return;
-        }
+        console.error(`Stotra with ID ${stotraId} not found`);
       }
     } catch (error) {
       console.error('Error loading stotra:', error);
@@ -197,14 +57,47 @@ const ReaderScreen: React.FC = () => {
   };
 
   const handleToggleFavorite = async () => {
-    if (!currentStotra) return;
+    if (!currentStotra || isTogglingFavorite) return;
+
+    console.log('Toggling favorite for stotra:', currentStotra.id, 'Current favorite status:', isFavorite);
 
     try {
+      setIsTogglingFavorite(true);
+      
+      // Immediate UI feedback
+      const newFavoriteStatus = !isFavorite;
+      setIsFavorite(newFavoriteStatus);
+      
+      console.log('Setting new favorite status to:', newFavoriteStatus);
+      
+      // Animate the star icon
+      Animated.sequence([
+        Animated.timing(scaleAnim, {
+          toValue: 1.3,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+        Animated.timing(scaleAnim, {
+          toValue: 1,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+      ]).start();
+
+      // Update in service
+      console.log('Calling stotraService.toggleFavorite with ID:', currentStotra.id);
       await stotraService.toggleFavorite(currentStotra.id);
-      // Reload stotra to get updated favorite status
-      await loadStotra();
+      console.log('Successfully updated favorite in service');
+      
+      // Update the current stotra object
+      setCurrentStotra(prev => prev ? { ...prev, isFavorite: newFavoriteStatus } : null);
+      
     } catch (error) {
       console.error('Error toggling favorite:', error);
+      // Revert on error
+      setIsFavorite(!isFavorite);
+    } finally {
+      setIsTogglingFavorite(false);
     }
   };
 
@@ -255,14 +148,24 @@ const ReaderScreen: React.FC = () => {
         readingProgress={readingProgress}
       />
       
-      {/* Favorite Button */}
-      <IconButton
-        icon={currentStotra.isFavorite ? 'star' : 'star-outline'}
-        size={28}
-        iconColor={currentStotra.isFavorite ? theme.colors.primary : theme.colors.onSurface}
-        style={[styles.favoriteButton, { backgroundColor: theme.colors.surface }]}
-        onPress={handleToggleFavorite}
-      />
+      {/* Enhanced Favorite Button with Animation */}
+      <Animated.View style={[styles.favoriteButtonContainer, { transform: [{ scale: scaleAnim }] }]}>
+        <IconButton
+          icon={isFavorite ? 'star' : 'star-outline'}
+          size={28}
+          iconColor={isFavorite ? theme.colors.primary : theme.colors.onSurface}
+          style={[
+            styles.favoriteButton, 
+            { 
+              backgroundColor: isFavorite 
+                ? theme.colors.primaryContainer 
+                : theme.colors.surface 
+            }
+          ]}
+          onPress={handleToggleFavorite}
+          disabled={isTogglingFavorite}
+        />
+      </Animated.View>
 
       {/* Floating Action Button for Settings */}
       <FAB
@@ -284,11 +187,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  favoriteButton: {
+  favoriteButtonContainer: {
     position: 'absolute',
     margin: 16,
     right: 0,
     top: 0,
+  },
+  favoriteButton: {
     borderRadius: 20,
     elevation: 4,
     shadowColor: '#000',

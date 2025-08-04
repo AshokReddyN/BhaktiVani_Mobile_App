@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Stotra } from '../types/stotra';
 import { LanguageType } from '../constants/languages';
+import { mockStotras } from '../data/mockStotras';
 
 class SimpleStorageService {
   private static instance: SimpleStorageService;
@@ -152,11 +153,27 @@ class SimpleStorageService {
    */
   async toggleFavorite(stotraId: string): Promise<void> {
     try {
+      console.log('simpleStorageService.toggleFavorite called with ID:', stotraId);
       const stotra = await this.getStotraById(stotraId);
       if (stotra) {
+        console.log('Found stotra, current favorite status:', stotra.isFavorite);
         stotra.isFavorite = !stotra.isFavorite;
         stotra.updatedAt = new Date();
+        console.log('New favorite status:', stotra.isFavorite);
         await this.storeStotra(stotra);
+        console.log('Successfully stored updated stotra');
+      } else {
+        console.log('Stotra not found in storage, will store from mock data');
+        // If not in storage, get from mock data and store it
+        const mockStotra = mockStotras.find(s => s.id === stotraId);
+        if (mockStotra) {
+          mockStotra.isFavorite = !mockStotra.isFavorite;
+          mockStotra.updatedAt = new Date();
+          await this.storeStotra(mockStotra);
+          console.log('Stored mock stotra with updated favorite status');
+        } else {
+          console.log('Stotra not found in mock data either');
+        }
       }
     } catch (error) {
       console.error('Error toggling favorite:', error);
@@ -303,6 +320,30 @@ class SimpleStorageService {
       await AsyncStorage.removeItem(downloadKey);
     } catch (error) {
       console.error('Error clearing language content:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get all keys from storage
+   */
+  async getAllKeys(): Promise<string[]> {
+    try {
+      return await AsyncStorage.getAllKeys();
+    } catch (error) {
+      console.error('Error getting all keys:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Remove an item from storage
+   */
+  async removeItem(key: string): Promise<void> {
+    try {
+      await AsyncStorage.removeItem(key);
+    } catch (error) {
+      console.error('Error removing item:', error);
       throw error;
     }
   }

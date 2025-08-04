@@ -37,9 +37,9 @@ const LibraryScreen: React.FC = () => {
     setShowCategories(query.length === 0);
   };
 
-  const handleStotraPress = (_stotraId: string) => {
+  const handleStotraPress = (stotraId: string) => {
     // Navigate to reader with the selected stotra
-    navigation.navigate('Reader' as never);
+    navigation.navigate('Reader' as never, { stotraId } as never);
   };
 
   if (isLoading) {

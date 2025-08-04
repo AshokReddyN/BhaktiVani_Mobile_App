@@ -1,14 +1,29 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useTheme, Button, Card, Chip } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { useLanguageContext } from '../../contexts/LanguageContext';
 import { SUPPORTED_LANGUAGES } from '../../constants/languages';
+import FavoriteTest from '../../components/test/FavoriteTest';
+import { initializationService } from '../../services/initializationService';
 
 const HomeScreen: React.FC = () => {
   const theme = useTheme();
   const navigation = useNavigation();
   const { selectedLanguage, setSelectedLanguage, currentLanguage } = useLanguageContext();
+
+  // Initialize app with mock data on first load
+  useEffect(() => {
+    const initializeApp = async () => {
+      try {
+        await initializationService.initializeApp();
+      } catch (error) {
+        console.error('Failed to initialize app:', error);
+      }
+    };
+    
+    initializeApp();
+  }, []);
 
   const handleStartReading = () => {
     navigation.navigate('Library' as never);
@@ -153,14 +168,21 @@ const HomeScreen: React.FC = () => {
             <Text style={[styles.feature, { color: theme.colors.onSurface }]}>
               ❤️ Favorites - Bookmark your favorite texts
             </Text>
-            <Text style={[styles.feature, { color: theme.colors.onSurface }]}>
-              🔊 Audio Guides - Listen to recitations
-            </Text>
-          </View>
-        </Card.Content>
-      </Card>
-    </ScrollView>
-  );
+                      <Text style={[styles.feature, { color: theme.colors.onSurface }]}>
+            🔊 Audio Guides - Listen to recitations
+          </Text>
+        </View>
+      </Card.Content>
+    </Card>
+
+    {/* Test Component */}
+    <Card style={[styles.card, { backgroundColor: theme.colors.surface }]}>
+      <Card.Content>
+        <FavoriteTest />
+      </Card.Content>
+    </Card>
+  </ScrollView>
+);
 };
 
 const styles = StyleSheet.create({

@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useTheme, Card, ActivityIndicator } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
 import { useLanguageContext } from '../../contexts/LanguageContext';
 import { stotraService } from '../../services/stotraService';
 import StotraList from '../../components/stotra/StotraList';
 
 const FavoritesScreen: React.FC = () => {
   const theme = useTheme();
+  const navigation = useNavigation();
   const { selectedLanguage, currentLanguage } = useLanguageContext();
   const [favoriteStotras, setFavoriteStotras] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -26,6 +28,11 @@ const FavoritesScreen: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleStotraPress = (stotraId: string) => {
+    // Navigate to reader with the selected stotra
+    navigation.navigate('Reader' as never, { stotraId } as never);
   };
 
   if (isLoading) {
@@ -99,6 +106,7 @@ const FavoritesScreen: React.FC = () => {
         <StotraList 
           showCategories={false}
           showFavorites={true}
+          onStotraPress={handleStotraPress}
         />
       </View>
     </ScrollView>
