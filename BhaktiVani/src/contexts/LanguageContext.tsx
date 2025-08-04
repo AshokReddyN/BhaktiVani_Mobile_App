@@ -1,11 +1,10 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { LanguageType, SUPPORTED_LANGUAGES, getLanguageById } from '../constants/languages';
+import { ContentLanguageType, SUPPORTED_CONTENT_LANGUAGES, getLanguageById } from '../constants/languages';
 import { storageService } from '../services/storageService';
-import { changeLanguage, getCurrentLanguageType, initializeLanguage } from '../i18n';
 
 interface LanguageContextType {
-  selectedLanguage: LanguageType;
-  setSelectedLanguage: (language: LanguageType) => void;
+  selectedLanguage: ContentLanguageType;
+  setSelectedLanguage: (language: ContentLanguageType) => void;
   currentLanguage: ReturnType<typeof getLanguageById>;
   isLoading: boolean;
 }
@@ -25,39 +24,43 @@ interface LanguageProviderProps {
 }
 
 export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
-  const [selectedLanguage, setSelectedLanguageState] = useState<LanguageType>('kannada');
+  const [selectedLanguage, setSelectedLanguageState] = useState<ContentLanguageType>('kannada');
   const [isLoading, setIsLoading] = useState(true);
 
   const currentLanguage = getLanguageById(selectedLanguage);
 
-  // Load language settings from storage on mount
+  // Load content language settings from storage on mount
   useEffect(() => {
-    const loadLanguageSettings = async () => {
+    const loadContentLanguageSettings = async () => {
       try {
-        // Initialize i18n with saved language
-        await initializeLanguage();
-        
-        // Get the current language type from i18n
-        const currentLangType = getCurrentLanguageType();
-        setSelectedLanguageState(currentLangType);
+        // Load saved content language settings
+        const savedLanguage = await storageService.getLanguageSettings();
+        if (savedLanguage && ['kannada', 'sanskrit', 'telugu'].includes(savedLanguage)) {
+          setSelectedLanguageState(savedLanguage as ContentLanguageType);
+        } else {
+          // Default to Kannada for content language
+          setSelectedLanguageState('kannada');
+        }
       } catch (error) {
-        console.error('Failed to load language settings:', error);
+        console.error('Failed to load content language settings:', error);
+        // Default to Kannada on error
+        setSelectedLanguageState('kannada');
       } finally {
         setIsLoading(false);
       }
     };
 
-    loadLanguageSettings();
+    loadContentLanguageSettings();
   }, []);
 
-  const setSelectedLanguage = async (language: LanguageType) => {
+  const setSelectedLanguage = async (language: ContentLanguageType) => {
     setSelectedLanguageState(language);
     
-    // Change i18n language
+    // Save content language setting
     try {
-      await changeLanguage(language);
+      await storageService.saveLanguageSettings(language);
     } catch (error) {
-      console.error('Failed to change language:', error);
+      console.error('Failed to save content language:', error);
     }
   };
 

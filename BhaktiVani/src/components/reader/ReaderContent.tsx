@@ -56,7 +56,7 @@ const ReaderContent: React.FC<ReaderContentProps> = ({
   const fontConfig = getFontForLanguage(currentLanguage.id);
   const baseFontSize = fontSizes[activeSettings.fontSize];
   const fontSize = getScaledFontSize(baseFontSize);
-  const lineHeight = fontSizes[activeSettings.lineHeight];
+  const lineHeight = lineHeights[activeSettings.lineHeight];
   const letterSpacingValue = letterSpacing[activeSettings.letterSpacing];
 
   // Parse content into paragraphs or lines based on layout setting
@@ -173,7 +173,7 @@ const ReaderContent: React.FC<ReaderContentProps> = ({
     const isBookmarked = bookmarks.includes(index);
 
     return (
-      <View key={index} style={styles.contentBlock}>
+      <View key={index} style={dynamicStyles.contentBlock}>
         {activeSettings.showLineNumbers && (
           <Text style={[styles.lineNumber, { color: theme.colors.onSurface }]}>
             {lineNumber}
@@ -193,6 +193,19 @@ const ReaderContent: React.FC<ReaderContentProps> = ({
         </TouchableOpacity>
       </View>
     );
+  };
+
+  // Create dynamic styles that use getScaledPadding
+  const dynamicStyles = {
+    contentContainer: {
+      padding: getScaledPadding(20),
+      paddingBottom: getScaledPadding(40),
+    },
+    contentBlock: {
+      flexDirection: 'row' as const,
+      marginBottom: getScaledPadding(16),
+      alignItems: 'flex-start' as const,
+    },
   };
 
   return (
@@ -239,7 +252,7 @@ const ReaderContent: React.FC<ReaderContentProps> = ({
       <ScrollView 
         ref={scrollViewRef}
         style={styles.scrollView}
-        contentContainerStyle={styles.contentContainer}
+        contentContainerStyle={dynamicStyles.contentContainer}
         showsVerticalScrollIndicator={false}
         onScroll={handleScroll}
         scrollEventThrottle={16}
@@ -327,10 +340,7 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-  contentContainer: {
-    padding: getScaledPadding(20),
-    paddingBottom: getScaledPadding(40),
-  },
+
   titleSection: {
     marginBottom: 32,
     alignItems: 'center',
@@ -349,11 +359,7 @@ const styles = StyleSheet.create({
   contentSection: {
     flex: 1,
   },
-  contentBlock: {
-    flexDirection: 'row',
-    marginBottom: getScaledPadding(16),
-    alignItems: 'flex-start',
-  },
+
   lineNumber: {
     fontSize: 12,
     marginRight: 12,

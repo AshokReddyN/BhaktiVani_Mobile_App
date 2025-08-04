@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
@@ -22,7 +22,7 @@ const RootNavigator: React.FC = () => {
   const { theme: currentTheme, isDark, isSepia } = useThemeContext();
 
   // Determine header style based on theme
-  const getHeaderStyle = () => {
+  const getHeaderStyle = useCallback(() => {
     if (isDark) {
       return {
         backgroundColor: theme.colors.surface,
@@ -39,15 +39,15 @@ const RootNavigator: React.FC = () => {
         borderBottomColor: theme.colors.primary,
       };
     }
-  };
+  }, [isDark, isSepia, theme.colors.surface, theme.colors.outline, theme.colors.primary]);
 
-  const getHeaderTintColor = () => {
+  const getHeaderTintColor = useCallback(() => {
     if (isDark || isSepia) {
       return theme.colors.onSurface;
     } else {
       return '#fff';
     }
-  };
+  }, [isDark, isSepia, theme.colors.onSurface]);
 
   return (
     <Stack.Navigator

@@ -47,22 +47,42 @@ class StorageService {
     }
   }
 
-  // Language Settings
+  // Content Language Settings (for stotra content)
   async saveLanguageSettings(language: string): Promise<void> {
     try {
       await this.init();
-      await AsyncStorage.setItem('selectedLanguage', language);
+      await AsyncStorage.setItem('selectedContentLanguage', language);
     } catch (error) {
-      console.error('Failed to save language settings:', error);
+      console.error('Failed to save content language settings:', error);
     }
   }
 
   async getLanguageSettings(): Promise<string | null> {
     try {
       await this.init();
-      return await AsyncStorage.getItem('selectedLanguage');
+      return await AsyncStorage.getItem('selectedContentLanguage');
     } catch (error) {
-      console.error('Failed to get language settings:', error);
+      console.error('Failed to get content language settings:', error);
+      return null;
+    }
+  }
+
+  // UI Language Settings (for app interface)
+  async saveUILanguageSettings(language: string): Promise<void> {
+    try {
+      await this.init();
+      await AsyncStorage.setItem('selectedUILanguage', language);
+    } catch (error) {
+      console.error('Failed to save UI language settings:', error);
+    }
+  }
+
+  async getUILanguageSettings(): Promise<string | null> {
+    try {
+      await this.init();
+      return await AsyncStorage.getItem('selectedUILanguage');
+    } catch (error) {
+      console.error('Failed to get UI language settings:', error);
       return null;
     }
   }

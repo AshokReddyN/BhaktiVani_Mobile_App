@@ -1,3 +1,11 @@
+// Polyfill for ReadableStream compatibility with Node.js 16
+if (typeof globalThis.ReadableStream === 'undefined') {
+  const { ReadableStream, WritableStream, TransformStream } = require('web-streams-polyfill');
+  globalThis.ReadableStream = ReadableStream;
+  globalThis.WritableStream = WritableStream;
+  globalThis.TransformStream = TransformStream;
+}
+
 import { registerRootComponent } from 'expo';
 
 import App from './App';

@@ -7,6 +7,7 @@ import { Provider as StoreProvider } from 'react-redux';
 import { store } from './src/store';
 import { ThemeProvider, useThemeContext, getCurrentTheme } from './src/constants/theme';
 import { LanguageProvider } from './src/contexts/LanguageContext';
+import { UILanguageProvider } from './src/contexts/UILanguageContext';
 import { ReaderProvider } from './src/contexts/ReaderContext';
 import { AccessibilityProvider, useAccessibilityContext } from './src/contexts/AccessibilityContext';
 import { offlineService } from './src/services/offlineService';
@@ -53,13 +54,15 @@ export default function App() {
   return (
     <StoreProvider store={store}>
       <ThemeProvider>
-        <LanguageProvider>
-          <ReaderProvider>
-            <AccessibilityProvider>
-              <AppContent />
-            </AccessibilityProvider>
-          </ReaderProvider>
-        </LanguageProvider>
+        <UILanguageProvider>
+          <LanguageProvider>
+            <ReaderProvider>
+              <AccessibilityProvider>
+                <AppContent />
+              </AccessibilityProvider>
+            </ReaderProvider>
+          </LanguageProvider>
+        </UILanguageProvider>
       </ThemeProvider>
     </StoreProvider>
   );

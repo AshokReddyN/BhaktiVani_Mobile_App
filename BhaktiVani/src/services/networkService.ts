@@ -60,7 +60,7 @@ class NetworkService {
   async getNetworkStrength(): Promise<number | null> {
     const state = await NetInfo.fetch();
     if (state.type === 'cellular' && state.details) {
-      return state.details.cellularGeneration || null;
+      return (state.details.cellularGeneration as unknown as number) || null;
     }
     return null;
   }

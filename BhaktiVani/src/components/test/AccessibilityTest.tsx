@@ -129,7 +129,7 @@ const AccessibilityTest: React.FC = () => {
                 Error
               </Text>
             </View>
-            <View style={[styles.colorBox, { backgroundColor: theme.colors.success }]}>
+            <View style={[styles.colorBox, { backgroundColor: theme.colors.primary }]}>
               <Text style={[styles.colorText, { color: theme.colors.onSurface }]}>
                 Success
               </Text>
