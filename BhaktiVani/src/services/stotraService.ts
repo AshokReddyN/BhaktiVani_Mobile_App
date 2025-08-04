@@ -1,6 +1,7 @@
 import { Stotra, StotraCategory } from '../types/stotra';
 import { LanguageType } from '../constants/languages';
 import { offlineService } from './offlineService';
+import { storageService } from './storageService';
 
 class StotraService {
   /**
@@ -86,6 +87,27 @@ class StotraService {
    */
   async updateReadingProgress(stotraId: string, progress: number): Promise<void> {
     await offlineService.updateReadingProgress(stotraId, progress);
+  }
+
+  /**
+   * Save reading position for a specific language
+   */
+  async saveReadingPosition(stotraId: string, language: string, position: number): Promise<void> {
+    await storageService.saveReadingPosition(stotraId, language, position);
+  }
+
+  /**
+   * Get reading position for a specific language
+   */
+  async getReadingPosition(stotraId: string, language: string): Promise<number> {
+    return await storageService.getReadingPosition(stotraId, language);
+  }
+
+  /**
+   * Get all reading positions for a language
+   */
+  async getLanguageReadingPositions(language: string): Promise<Record<string, number>> {
+    return await storageService.getLanguageReadingPositions(language);
   }
 
   /**

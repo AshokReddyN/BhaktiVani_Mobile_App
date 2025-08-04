@@ -2,21 +2,25 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
 import { useTheme, FAB, IconButton } from 'react-native-paper';
 import { useLanguageContext } from '../../contexts/LanguageContext';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { stotraService } from '../../services/stotraService';
 import { Stotra } from '../../types/stotra';
 import ReaderContent from '../../components/reader/ReaderContent';
 import ReaderControls from '../../components/reader/ReaderControls';
+import { RootStackParamList } from '../../types/navigation';
+
+type ReaderScreenRouteProp = RouteProp<RootStackParamList, 'Reader'>;
 
 const ReaderScreen: React.FC = () => {
   const theme = useTheme();
   const navigation = useNavigation();
-  const route = useRoute();
+  const route = useRoute<ReaderScreenRouteProp>();
   const { currentLanguage } = useLanguageContext();
   const [showControls, setShowControls] = useState(false);
   const [currentStotra, setCurrentStotra] = useState<Stotra | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [readingProgress, setReadingProgress] = useState(0);
+  const [savedScrollPosition, setSavedScrollPosition] = useState(0);
   const [bookmarks, setBookmarks] = useState<number[]>([]);
   const [showBookmarksList, setShowBookmarksList] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -46,6 +50,11 @@ const ReaderScreen: React.FC = () => {
         setReadingProgress(stotra.readingProgress);
         setIsFavorite(stotra.isFavorite);
         console.log('Loaded stotra:', stotra.title, 'Favorite status:', stotra.isFavorite);
+        
+        // Load saved reading position for current language
+        const savedPosition = await stotraService.getReadingPosition(stotraId, currentLanguage.id);
+        setSavedScrollPosition(savedPosition);
+        console.log('Loaded saved scroll position:', savedPosition, 'for language:', currentLanguage.id);
       } else {
         console.error(`Stotra with ID ${stotraId} not found`);
       }
@@ -114,6 +123,18 @@ const ReaderScreen: React.FC = () => {
     }
   }, [currentStotra]);
 
+  const handleScrollPositionUpdate = useCallback(async (position: number) => {
+    // Save scroll position for current language
+    if (currentStotra && position > 0) {
+      try {
+        await stotraService.saveReadingPosition(currentStotra.id, currentLanguage.id, position);
+        console.log('Saved scroll position:', position, 'for language:', currentLanguage.id);
+      } catch (error) {
+        console.error('Error saving scroll position:', error);
+      }
+    }
+  }, [currentStotra, currentLanguage.id]);
+
   const handleBookmarkToggle = useCallback((position: number) => {
     setBookmarks(prev => {
       if (prev.includes(position)) {
@@ -143,9 +164,11 @@ const ReaderScreen: React.FC = () => {
         title={currentStotra.title}
         nativeTitle={currentStotra.nativeTitle}
         onProgressUpdate={handleProgressUpdate}
+        onScrollPositionUpdate={handleScrollPositionUpdate}
         onBookmarkToggle={handleBookmarkToggle}
         bookmarks={bookmarks}
         readingProgress={readingProgress}
+        initialScrollPosition={savedScrollPosition}
       />
       
       {/* Enhanced Favorite Button with Animation */}

@@ -13,9 +13,11 @@ interface ReaderContentProps {
   nativeTitle: string;
   previewSettings?: ReaderSettings;
   onProgressUpdate?: (progress: number) => void;
+  onScrollPositionUpdate?: (position: number) => void;
   onBookmarkToggle?: (position: number) => void;
   bookmarks?: number[];
   readingProgress?: number;
+  initialScrollPosition?: number;
 }
 
 const ReaderContent: React.FC<ReaderContentProps> = ({ 
@@ -24,9 +26,11 @@ const ReaderContent: React.FC<ReaderContentProps> = ({
   nativeTitle, 
   previewSettings,
   onProgressUpdate,
+  onScrollPositionUpdate,
   onBookmarkToggle,
   bookmarks = [],
-  readingProgress = 0
+  readingProgress = 0,
+  initialScrollPosition = 0
 }) => {
   const theme = useTheme();
   const { currentLanguage } = useLanguageContext();
@@ -34,13 +38,14 @@ const ReaderContent: React.FC<ReaderContentProps> = ({
   const { isDark, isSepia } = useThemeContext();
   
   const scrollViewRef = useRef<ScrollView>(null);
-  const [scrollPosition, setScrollPosition] = useState(0);
+  const [scrollPosition, setScrollPosition] = useState(initialScrollPosition);
   const [contentHeight, setContentHeight] = useState(0);
   const [containerHeight, setContainerHeight] = useState(0);
   const [isAutoScrolling, setIsAutoScrolling] = useState(false);
   const [autoScrollSpeed, setAutoScrollSpeed] = useState(1);
   const [selectedText, setSelectedText] = useState<string>('');
   const [showProgress, setShowProgress] = useState(false);
+  const [hasRestoredPosition, setHasRestoredPosition] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   // Use preview settings if provided, otherwise use context settings
@@ -108,9 +113,29 @@ const ReaderContent: React.FC<ReaderContentProps> = ({
     }).start();
   }, [showProgress, fadeAnim]);
 
+  // Restore scroll position when content is loaded
+  useEffect(() => {
+    if (initialScrollPosition > 0 && contentHeight > 0 && containerHeight > 0 && !hasRestoredPosition && scrollViewRef.current) {
+      const maxScrollPosition = contentHeight - containerHeight;
+      const targetPosition = Math.min(initialScrollPosition, maxScrollPosition);
+      
+      if (targetPosition > 0) {
+        scrollViewRef.current.scrollTo({ y: targetPosition, animated: false });
+        setScrollPosition(targetPosition);
+        setHasRestoredPosition(true);
+        console.log('Restored scroll position to:', targetPosition);
+      }
+    }
+  }, [initialScrollPosition, contentHeight, containerHeight, hasRestoredPosition]);
+
   const handleScroll = (event: any) => {
     const offsetY = event.nativeEvent.contentOffset.y;
     setScrollPosition(offsetY);
+    
+    // Call scroll position update callback
+    if (onScrollPositionUpdate) {
+      onScrollPositionUpdate(offsetY);
+    }
   };
 
   const handleContentLayout = (event: any) => {
