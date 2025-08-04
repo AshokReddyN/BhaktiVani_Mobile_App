@@ -1,8 +1,9 @@
 import React from 'react';
 import { Easing } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
+import { useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
-import { useThemeContext, lightTheme, darkTheme, sepiaTheme } from '../constants/theme';
+import { useThemeContext } from '../constants/theme';
 
 // Import screens
 import HomeScreen from '../screens/home/HomeScreen';
@@ -19,10 +20,9 @@ const Stack = createStackNavigator();
 const transitionEasing = Easing.inOut(Easing.ease);
 
 const RootNavigator: React.FC = () => {
+  const theme = useTheme();
   const { t } = useTranslation();
   const { isDark, isSepia } = useThemeContext();
-
-  const theme = isDark ? darkTheme : isSepia ? sepiaTheme : lightTheme;
 
   // Determine header style based on theme
   const getHeaderStyle = () => {
