@@ -1,14 +1,13 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import * as Localization from 'expo-localization';
 import { storageService } from '../services/storageService';
 import { LanguageType } from '../constants/languages';
 
 // Import translation files
-import en from './locales/en.json';
-import kn from './locales/kn.json';
-import sa from './locales/sa.json';
-import te from './locales/te.json';
+const en = require('./locales/en.json');
+const kn = require('./locales/kn.json');
+const sa = require('./locales/sa.json');
+const te = require('./locales/te.json');
 
 const resources = {
   en: {
@@ -34,55 +33,55 @@ const languageCodeMap: Record<LanguageType, string> = {
 
 // Get the device locale or fallback to English
 const getDeviceLocale = (): string => {
-  try {
-    // Check if Localization is available
-    if (!Localization || !Localization.locale) {
-      console.warn('Localization is not available, falling back to English');
-      return 'en';
-    }
-    
-    const deviceLocale = Localization.locale;
-    
-    // Check if deviceLocale is valid
-    if (!deviceLocale || typeof deviceLocale !== 'string') {
-      console.warn('Device locale is not available, falling back to English');
-      return 'en';
-    }
-    
-    const languageCode = deviceLocale.split('-')[0];
-    
-    // Check if we support this language
-    if (Object.values(languageCodeMap).includes(languageCode)) {
-      return languageCode;
-    }
-    
-    return 'en'; // Default to English
-  } catch (error) {
-    console.error('Error getting device locale:', error);
-    return 'en'; // Default to English on error
-  }
+  // For now, just return English to avoid the expo-localization issue
+  // We can add proper device locale detection later
+  return 'en';
 };
 
 // Simple initialization function
 const initializeI18n = () => {
-  const defaultLanguage = getDeviceLocale();
-  
-  i18n
-    .use(initReactI18next)
-    .init({
-      resources,
-      lng: defaultLanguage,
-      fallbackLng: 'en',
-      compatibilityJSON: 'v4',
-      interpolation: {
-        escapeValue: false,
-      },
-      react: {
-        useSuspense: false,
-      },
-    });
+  try {
+    const defaultLanguage = getDeviceLocale();
     
-  console.log('i18n initialized with language:', defaultLanguage);
+    i18n
+      .use(initReactI18next)
+      .init({
+        resources,
+        lng: defaultLanguage,
+        fallbackLng: 'en',
+        compatibilityJSON: 'v4',
+        interpolation: {
+          escapeValue: false,
+        },
+        react: {
+          useSuspense: false,
+        },
+      });
+      
+    console.log('i18n initialized with language:', defaultLanguage);
+  } catch (error) {
+    console.error('Failed to initialize i18n:', error);
+    // Fallback initialization
+    try {
+      i18n
+        .use(initReactI18next)
+        .init({
+          resources,
+          lng: 'en',
+          fallbackLng: 'en',
+          compatibilityJSON: 'v4',
+          interpolation: {
+            escapeValue: false,
+          },
+          react: {
+            useSuspense: false,
+          },
+        });
+      console.log('i18n initialized with fallback language: en');
+    } catch (fallbackError) {
+      console.error('Failed to initialize i18n with fallback:', fallbackError);
+    }
+  }
 };
 
 // Function to change language
@@ -125,7 +124,16 @@ export const initializeLanguage = async () => {
     }
   } catch (error) {
     console.error('Failed to initialize language from storage:', error);
+    // Ensure i18n is initialized even if storage fails
+    initializeI18n();
   }
 };
+
+// Initialize i18n synchronously as a backup
+try {
+  initializeI18n();
+} catch (error) {
+  console.error('Failed to initialize i18n synchronously:', error);
+}
 
 export default i18n; 
