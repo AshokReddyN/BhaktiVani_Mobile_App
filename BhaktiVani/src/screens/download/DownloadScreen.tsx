@@ -128,7 +128,7 @@ const DownloadScreen: React.FC = () => {
 
   const getStatusColor = (status: LanguageDownloadStatus) => {
     if (status.isDownloading) return theme.colors.primary;
-    if (status.isDownloaded) return theme.colors.success;
+    if (status.isDownloaded) return theme.colors.primary;
     return theme.colors.outline;
   };
 

@@ -2,7 +2,7 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import * as Localization from 'expo-localization';
 import { storageService } from '../services/storageService';
-import { LanguageType } from '../constants/languages';
+import { UILanguageType } from '../constants/languages';
 
 // Import translation files
 import en from './locales/en.json';
@@ -25,8 +25,9 @@ const resources = {
   },
 };
 
-// Language code mapping
-const languageCodeMap: Record<LanguageType, string> = {
+// UI Language code mapping (for app interface)
+const uiLanguageCodeMap: Record<UILanguageType, string> = {
+  english: 'en',
   kannada: 'kn',
   sanskrit: 'sa',
   telugu: 'te',
@@ -51,8 +52,8 @@ const getDeviceLocale = (): string => {
     
     const languageCode = deviceLocale.split('-')[0];
     
-    // Check if we support this language
-    if (Object.values(languageCodeMap).includes(languageCode)) {
+    // Check if we support this language for UI
+    if (Object.values(uiLanguageCodeMap).includes(languageCode)) {
       return languageCode;
     }
     
@@ -65,7 +66,8 @@ const getDeviceLocale = (): string => {
 
 // Simple initialization function
 const initializeI18n = () => {
-  const defaultLanguage = getDeviceLocale();
+  // Always start with English to ensure consistent hook behavior
+  const defaultLanguage = 'en';
   
   i18n
     .use(initReactI18next)
@@ -85,47 +87,59 @@ const initializeI18n = () => {
   console.log('i18n initialized with language:', defaultLanguage);
 };
 
-// Function to change language
-export const changeLanguage = async (languageType: LanguageType) => {
-  const languageCode = languageCodeMap[languageType];
+// Function to change UI language
+export const changeUILanguage = async (languageType: UILanguageType) => {
+  const languageCode = uiLanguageCodeMap[languageType];
   await i18n.changeLanguage(languageCode);
   
-  // Save to storage
+  // Save to storage with a different key for UI language
   try {
-    await storageService.saveLanguageSettings(languageType);
+    await storageService.saveUILanguageSettings(languageType);
   } catch (error) {
-    console.error('Failed to save language settings:', error);
+    console.error('Failed to save UI language settings:', error);
   }
 };
 
-// Function to get current language type
-export const getCurrentLanguageType = (): LanguageType => {
+// Function to get current UI language type
+export const getCurrentUILanguageType = (): UILanguageType => {
   const currentLang = i18n.language;
   
   // Find the language type for the current language code
-  for (const [type, code] of Object.entries(languageCodeMap)) {
+  for (const [type, code] of Object.entries(uiLanguageCodeMap)) {
     if (code === currentLang) {
-      return type as LanguageType;
+      return type as UILanguageType;
     }
   }
   
-  return 'kannada'; // Default fallback
+  return 'english'; // Default to English for UI
 };
 
-// Function to initialize i18n and language from storage
-export const initializeLanguage = async () => {
+// Keep old functions for backward compatibility
+export const changeLanguage = changeUILanguage;
+export const getCurrentLanguageType = getCurrentUILanguageType;
+
+// Function to initialize i18n synchronously
+export const initializeLanguageSync = () => {
+  // Initialize i18n immediately with English default
+  initializeI18n();
+};
+
+// Function to load saved UI language from storage (async)
+export const loadSavedUILanguage = async () => {
   try {
-    // Initialize i18n first
-    initializeI18n();
-    
-    // Then load saved language settings
-    const savedLanguage = await storageService.getLanguageSettings();
-    if (savedLanguage && ['kannada', 'sanskrit', 'telugu'].includes(savedLanguage)) {
-      await changeLanguage(savedLanguage as LanguageType);
+    const savedUILanguage = await storageService.getUILanguageSettings();
+    if (savedUILanguage && ['english', 'kannada', 'sanskrit', 'telugu'].includes(savedUILanguage)) {
+      await changeUILanguage(savedUILanguage as UILanguageType);
     }
   } catch (error) {
-    console.error('Failed to initialize language from storage:', error);
+    console.error('Failed to load saved UI language:', error);
   }
+};
+
+// Keep old function for backward compatibility
+export const initializeLanguage = async () => {
+  initializeLanguageSync();
+  await loadSavedUILanguage();
 };
 
 export default i18n; 

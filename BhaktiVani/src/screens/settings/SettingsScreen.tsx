@@ -5,8 +5,9 @@ import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { useThemeContext } from '../../constants/theme';
 import { useLanguageContext } from '../../contexts/LanguageContext';
+import { useUILanguageContext } from '../../contexts/UILanguageContext';
 import { useAccessibilityContext } from '../../contexts/AccessibilityContext';
-import { SUPPORTED_LANGUAGES } from '../../constants/languages';
+import { SUPPORTED_LANGUAGES, SUPPORTED_UI_LANGUAGES } from '../../constants/languages';
 
 const SettingsScreen: React.FC = () => {
   const theme = useTheme();
@@ -14,6 +15,7 @@ const SettingsScreen: React.FC = () => {
   const { t } = useTranslation();
   const { theme: currentTheme, setTheme, isDark, isSepia } = useThemeContext();
   const { selectedLanguage, setSelectedLanguage, currentLanguage } = useLanguageContext();
+  const { selectedUILanguage, setSelectedUILanguage, currentUILanguage } = useUILanguageContext();
   const { settings, updateSettings } = useAccessibilityContext();
 
   const themeOptions = [
@@ -173,14 +175,58 @@ const SettingsScreen: React.FC = () => {
 
       <Divider style={styles.divider} />
 
-      {/* Language Settings */}
+      {/* Interface Language Settings */}
       <View style={[styles.section, { backgroundColor: theme.colors.surface }]}>
         <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>
-          {t('settings.language')}
+          {t('settings.interfaceLanguage')}
+        </Text>
+        
+        <Text style={[styles.sectionDescription, { color: theme.colors.onSurface }]}>
+          {t('settings.interfaceLanguageDescription')}
         </Text>
         
         <Text style={[styles.currentLanguage, { color: theme.colors.onSurface }]}>
-          {t('home.currentLanguage')}: {currentLanguage.nativeName} ({currentLanguage.name})
+          {t('settings.currentInterfaceLanguage')}: {currentUILanguage.nativeName} ({currentUILanguage.name})
+        </Text>
+
+        {SUPPORTED_UI_LANGUAGES.map((language) => (
+          <List.Item
+            key={language.id}
+            title={`${language.flag} ${language.nativeName}`}
+            description={language.name}
+            left={(props) => <List.Icon {...props} icon="web" />}
+            onPress={() => setSelectedUILanguage(language.id)}
+            titleStyle={[
+              styles.listItemTitle, 
+              { 
+                color: selectedUILanguage === language.id 
+                  ? theme.colors.primary 
+                  : theme.colors.onSurface 
+              }
+            ]}
+            descriptionStyle={[styles.listItemDescription, { color: theme.colors.onSurface }]}
+            style={[
+              styles.languageItem,
+              selectedUILanguage === language.id && { backgroundColor: theme.colors.primaryContainer }
+            ]}
+          />
+        ))}
+      </View>
+
+      <Divider style={styles.divider} />
+
+      {/* Content Language Settings */}
+      <View style={[styles.section, { backgroundColor: theme.colors.surface }]}>
+        <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>
+          {t('settings.contentLanguage')}
+        </Text>
+        
+        <Text style={[styles.sectionDescription, { color: theme.colors.onSurface }]}>
+          {t('settings.contentLanguageDescription')}
+        </Text>
+        
+        <Text style={[styles.currentLanguage, { color: theme.colors.onSurface }]}>
+          {t('settings.currentContentLanguage')}: {currentLanguage.nativeName} ({currentLanguage.name})
         </Text>
 
         {SUPPORTED_LANGUAGES.map((language) => (
@@ -188,7 +234,7 @@ const SettingsScreen: React.FC = () => {
             key={language.id}
             title={`${language.flag} ${language.nativeName}`}
             description={language.name}
-            left={(props) => <List.Icon {...props} icon="translate" />}
+            left={(props) => <List.Icon {...props} icon="book-open-variant" />}
             onPress={() => setSelectedLanguage(language.id)}
             titleStyle={[
               styles.listItemTitle, 
@@ -261,10 +307,18 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingBottom: 8,
   },
+  sectionDescription: {
+    fontSize: 14,
+    paddingHorizontal: 16,
+    paddingBottom: 8,
+    fontStyle: 'italic',
+    opacity: 0.8,
+  },
   currentLanguage: {
     fontSize: 14,
     paddingHorizontal: 16,
     paddingBottom: 8,
+    fontWeight: '500',
   },
   listItemTitle: {
     fontSize: 16,

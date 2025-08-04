@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
@@ -21,40 +21,44 @@ const RootNavigator: React.FC = () => {
   const { t } = useTranslation();
   const { theme: currentTheme, isDark, isSepia } = useThemeContext();
 
-  // Determine header style based on theme
-  const getHeaderStyle = () => {
-    if (isDark) {
+  // Memoize theme colors to stabilize references
+  const themeColors = useMemo(() => ({
+    surface: theme.colors.surface,
+    outline: theme.colors.outline,
+    primary: theme.colors.primary,
+    onSurface: theme.colors.onSurface,
+  }), [theme.colors.surface, theme.colors.outline, theme.colors.primary, theme.colors.onSurface]);
+
+  // Memoize header style instead of using callback
+  const headerStyle = useMemo(() => {
+    if (isDark || isSepia) {
       return {
-        backgroundColor: theme.colors.surface,
-        borderBottomColor: theme.colors.outline,
-      };
-    } else if (isSepia) {
-      return {
-        backgroundColor: theme.colors.surface,
-        borderBottomColor: theme.colors.outline,
+        backgroundColor: themeColors.surface,
+        borderBottomColor: themeColors.outline,
       };
     } else {
       return {
-        backgroundColor: theme.colors.primary,
-        borderBottomColor: theme.colors.primary,
+        backgroundColor: themeColors.primary,
+        borderBottomColor: themeColors.primary,
       };
     }
-  };
+  }, [isDark, isSepia, themeColors.surface, themeColors.outline, themeColors.primary]);
 
-  const getHeaderTintColor = () => {
+  // Memoize header tint color instead of using callback
+  const headerTintColor = useMemo(() => {
     if (isDark || isSepia) {
-      return theme.colors.onSurface;
+      return themeColors.onSurface;
     } else {
       return '#fff';
     }
-  };
+  }, [isDark, isSepia, themeColors.onSurface]);
 
   return (
     <Stack.Navigator
       initialRouteName="Home"
       screenOptions={{
-        headerStyle: getHeaderStyle(),
-        headerTintColor: getHeaderTintColor(),
+        headerStyle: headerStyle,
+        headerTintColor: headerTintColor,
         headerTitleStyle: {
           fontWeight: 'bold',
         },

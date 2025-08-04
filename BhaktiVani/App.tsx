@@ -7,11 +7,15 @@ import { Provider as StoreProvider } from 'react-redux';
 import { store } from './src/store';
 import { ThemeProvider, useThemeContext, getCurrentTheme } from './src/constants/theme';
 import { LanguageProvider } from './src/contexts/LanguageContext';
+import { UILanguageProvider } from './src/contexts/UILanguageContext';
 import { ReaderProvider } from './src/contexts/ReaderContext';
 import { AccessibilityProvider, useAccessibilityContext } from './src/contexts/AccessibilityContext';
 import { offlineService } from './src/services/offlineService';
 import RootNavigator from './src/navigation/RootNavigator';
-import { initializeLanguage } from './src/i18n'; // Import initialization function
+import { initializeLanguageSync, loadSavedUILanguage } from './src/i18n'; // Import initialization functions
+
+// Initialize i18n synchronously before any component renders
+initializeLanguageSync();
 
 const AppContent: React.FC = () => {
   const { theme, isDark } = useThemeContext();
@@ -22,9 +26,9 @@ const AppContent: React.FC = () => {
     // Initialize services
     const initializeServices = async () => {
       try {
-        // Initialize i18n language
-        await initializeLanguage();
-        console.log('i18n language initialized successfully');
+        // Load saved UI language (async)
+        await loadSavedUILanguage();
+        console.log('UI language loaded successfully');
         
         // Initialize offline service
         await offlineService.init();
@@ -53,13 +57,15 @@ export default function App() {
   return (
     <StoreProvider store={store}>
       <ThemeProvider>
-        <LanguageProvider>
-          <ReaderProvider>
-            <AccessibilityProvider>
-              <AppContent />
-            </AccessibilityProvider>
-          </ReaderProvider>
-        </LanguageProvider>
+        <UILanguageProvider>
+          <LanguageProvider>
+            <ReaderProvider>
+              <AccessibilityProvider>
+                <AppContent />
+              </AccessibilityProvider>
+            </ReaderProvider>
+          </LanguageProvider>
+        </UILanguageProvider>
       </ThemeProvider>
     </StoreProvider>
   );
