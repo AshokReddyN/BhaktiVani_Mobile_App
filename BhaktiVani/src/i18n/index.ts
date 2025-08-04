@@ -34,34 +34,56 @@ const languageCodeMap: Record<LanguageType, string> = {
 
 // Get the device locale or fallback to English
 const getDeviceLocale = (): string => {
-  const deviceLocale = Localization.locale;
-  const languageCode = deviceLocale.split('-')[0];
-  
-  // Check if we support this language
-  if (Object.values(languageCodeMap).includes(languageCode)) {
-    return languageCode;
+  try {
+    // Check if Localization is available
+    if (!Localization || !Localization.locale) {
+      console.warn('Localization is not available, falling back to English');
+      return 'en';
+    }
+    
+    const deviceLocale = Localization.locale;
+    
+    // Check if deviceLocale is valid
+    if (!deviceLocale || typeof deviceLocale !== 'string') {
+      console.warn('Device locale is not available, falling back to English');
+      return 'en';
+    }
+    
+    const languageCode = deviceLocale.split('-')[0];
+    
+    // Check if we support this language
+    if (Object.values(languageCodeMap).includes(languageCode)) {
+      return languageCode;
+    }
+    
+    return 'en'; // Default to English
+  } catch (error) {
+    console.error('Error getting device locale:', error);
+    return 'en'; // Default to English on error
   }
-  
-  return 'en'; // Default to English
 };
 
-// Initialize i18n
-i18n
-  .use(initReactI18next)
-  .init({
-    resources,
-    lng: getDeviceLocale(), // Default language
-    fallbackLng: 'en',
-    compatibilityJSON: 'v3', // For React Native compatibility
+// Simple initialization function
+const initializeI18n = () => {
+  const defaultLanguage = getDeviceLocale();
+  
+  i18n
+    .use(initReactI18next)
+    .init({
+      resources,
+      lng: defaultLanguage,
+      fallbackLng: 'en',
+      compatibilityJSON: 'v4',
+      interpolation: {
+        escapeValue: false,
+      },
+      react: {
+        useSuspense: false,
+      },
+    });
     
-    interpolation: {
-      escapeValue: false, // React already escapes values
-    },
-    
-    react: {
-      useSuspense: false, // Disable Suspense for React Native
-    },
-  });
+  console.log('i18n initialized with language:', defaultLanguage);
+};
 
 // Function to change language
 export const changeLanguage = async (languageType: LanguageType) => {
@@ -90,9 +112,13 @@ export const getCurrentLanguageType = (): LanguageType => {
   return 'kannada'; // Default fallback
 };
 
-// Function to initialize language from storage
+// Function to initialize i18n and language from storage
 export const initializeLanguage = async () => {
   try {
+    // Initialize i18n first
+    initializeI18n();
+    
+    // Then load saved language settings
     const savedLanguage = await storageService.getLanguageSettings();
     if (savedLanguage && ['kannada', 'sanskrit', 'telugu'].includes(savedLanguage)) {
       await changeLanguage(savedLanguage as LanguageType);

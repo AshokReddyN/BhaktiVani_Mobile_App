@@ -11,7 +11,7 @@ import { ReaderProvider } from './src/contexts/ReaderContext';
 import { AccessibilityProvider, useAccessibilityContext } from './src/contexts/AccessibilityContext';
 import { offlineService } from './src/services/offlineService';
 import RootNavigator from './src/navigation/RootNavigator';
-import './src/i18n'; // Initialize i18n
+import { initializeLanguage } from './src/i18n'; // Import initialization function
 
 const AppContent: React.FC = () => {
   const { theme, isDark } = useThemeContext();
@@ -19,17 +19,22 @@ const AppContent: React.FC = () => {
   const currentTheme = getCurrentTheme(theme, settings.isHighContrastEnabled);
 
   useEffect(() => {
-    // Initialize offline service
-    const initOfflineService = async () => {
+    // Initialize services
+    const initializeServices = async () => {
       try {
+        // Initialize i18n language
+        await initializeLanguage();
+        console.log('i18n language initialized successfully');
+        
+        // Initialize offline service
         await offlineService.init();
         console.log('Offline service initialized successfully');
       } catch (error) {
-        console.error('Failed to initialize offline service:', error);
+        console.error('Failed to initialize services:', error);
       }
     };
 
-    initOfflineService();
+    initializeServices();
   }, []);
 
   return (
