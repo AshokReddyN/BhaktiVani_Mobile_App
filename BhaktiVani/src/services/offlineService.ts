@@ -1,7 +1,7 @@
 import { Stotra } from '../types/stotra';
 import { LanguageType } from '../constants/languages';
 import { simpleStorageService } from './simpleStorageService';
-import { mockStotras } from '../data/mockStotras';
+import { productionStotras } from '../data/productionStotras';
 
 class OfflineService {
   private static instance: OfflineService;
@@ -40,8 +40,8 @@ class OfflineService {
     this.downloadInProgress = true;
 
     try {
-      // Get all stotras for the language from mock data
-      const languageStotras = mockStotras.filter(stotra => stotra.language === language);
+      // Get all stotras for the language from production data
+      const languageStotras = productionStotras.filter(stotra => stotra.language === language);
       const totalStotras = languageStotras.length;
 
       if (totalStotras === 0) {
@@ -98,14 +98,14 @@ class OfflineService {
         // Get from storage
         return await simpleStorageService.getStotrasByLanguage(language);
       } else {
-        // Fallback to mock data
+        // Fallback to production data
         console.log(`Language ${language} not downloaded, using fallback data`);
-        return mockStotras.filter(stotra => stotra.language === language);
+        return productionStotras.filter(stotra => stotra.language === language);
       }
     } catch (error) {
       console.error(`Error getting stotras for ${language}:`, error);
-      // Fallback to mock data
-      return mockStotras.filter(stotra => stotra.language === language);
+      // Fallback to production data
+      return productionStotras.filter(stotra => stotra.language === language);
     }
   }
 
@@ -120,12 +120,12 @@ class OfflineService {
         return stotra;
       }
 
-      // Fallback to mock data
-      return mockStotras.find(s => s.id === id) || null;
+      // Fallback to production data
+      return productionStotras.filter(s => s.id === id)[0] || null;
     } catch (error) {
       console.error(`Error getting stotra ${id}:`, error);
-      // Fallback to mock data
-      return mockStotras.find(s => s.id === id) || null;
+      // Fallback to production data
+      return productionStotras.filter(s => s.id === id)[0] || null;
     }
   }
 
@@ -141,15 +141,15 @@ class OfflineService {
         // Get from storage
         return await simpleStorageService.getFavoriteStotras(language);
       } else {
-        // Fallback to mock data
-        return mockStotras.filter(stotra => 
+        // Fallback to production data
+        return productionStotras.filter(stotra => 
           stotra.language === language && stotra.isFavorite
         );
       }
     } catch (error) {
       console.error(`Error getting favorite stotras for ${language}:`, error);
-      // Fallback to mock data
-      return mockStotras.filter(stotra => 
+      // Fallback to production data
+      return productionStotras.filter(stotra => 
         stotra.language === language && stotra.isFavorite
       );
     }
