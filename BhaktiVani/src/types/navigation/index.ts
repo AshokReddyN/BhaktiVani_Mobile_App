@@ -6,6 +6,7 @@ export type RootStackParamList = {
   Favorites: undefined;
   Download: undefined;
   Search: undefined;
+  AccessibilityTest: undefined;
 };
 
 declare global {

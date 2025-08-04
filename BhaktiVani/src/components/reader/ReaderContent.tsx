@@ -4,6 +4,7 @@ import { useTheme, IconButton, ProgressBar } from 'react-native-paper';
 import { useLanguageContext } from '../../contexts/LanguageContext';
 import { useReaderContext } from '../../contexts/ReaderContext';
 import { useThemeContext } from '../../constants/theme';
+import { useAccessibilityContext } from '../../contexts/AccessibilityContext';
 import { getFontForLanguage, fontSizes, lineHeights, letterSpacing } from '../../constants/fonts';
 import { ReaderSettings } from '../../contexts/ReaderContext';
 
@@ -36,6 +37,7 @@ const ReaderContent: React.FC<ReaderContentProps> = ({
   const { currentLanguage } = useLanguageContext();
   const { settings } = useReaderContext();
   const { isDark, isSepia } = useThemeContext();
+  const { getScaledFontSize, getScaledPadding } = useAccessibilityContext();
   
   const scrollViewRef = useRef<ScrollView>(null);
   const [scrollPosition, setScrollPosition] = useState(initialScrollPosition);
@@ -52,7 +54,8 @@ const ReaderContent: React.FC<ReaderContentProps> = ({
   const activeSettings = previewSettings || settings;
 
   const fontConfig = getFontForLanguage(currentLanguage.id);
-  const fontSize = fontSizes[activeSettings.fontSize];
+  const baseFontSize = fontSizes[activeSettings.fontSize];
+  const fontSize = getScaledFontSize(baseFontSize);
   const lineHeight = fontSizes[activeSettings.lineHeight];
   const letterSpacingValue = letterSpacing[activeSettings.letterSpacing];
 
@@ -325,8 +328,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentContainer: {
-    padding: 20,
-    paddingBottom: 40,
+    padding: getScaledPadding(20),
+    paddingBottom: getScaledPadding(40),
   },
   titleSection: {
     marginBottom: 32,
@@ -348,7 +351,7 @@ const styles = StyleSheet.create({
   },
   contentBlock: {
     flexDirection: 'row',
-    marginBottom: 16,
+    marginBottom: getScaledPadding(16),
     alignItems: 'flex-start',
   },
   lineNumber: {

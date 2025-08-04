@@ -1,6 +1,7 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useTheme } from 'react-native-paper';
+import { useTranslation } from 'react-i18next';
 import { useThemeContext } from '../constants/theme';
 
 // Import screens
@@ -11,11 +12,13 @@ import FavoritesScreen from '../screens/favorites/FavoritesScreen';
 import LibraryScreen from '../screens/library/LibraryScreen';
 import DownloadScreen from '../screens/download/DownloadScreen';
 import SearchScreen from '../screens/search/SearchScreen';
+import AccessibilityTest from '../components/test/AccessibilityTest';
 
 const Stack = createStackNavigator();
 
 const RootNavigator: React.FC = () => {
   const theme = useTheme();
+  const { t } = useTranslation();
   const { theme: currentTheme, isDark, isSepia } = useThemeContext();
 
   // Determine header style based on theme
@@ -89,7 +92,7 @@ const RootNavigator: React.FC = () => {
         name="Library" 
         component={LibraryScreen} 
         options={{ 
-          title: 'Library',
+          title: t('navigation.library'),
           headerShown: true,
         }} 
       />
@@ -97,7 +100,7 @@ const RootNavigator: React.FC = () => {
         name="Reader" 
         component={ReaderScreen} 
         options={{ 
-          title: 'Reader',
+          title: t('navigation.reader'),
           headerShown: true,
         }} 
       />
@@ -105,7 +108,7 @@ const RootNavigator: React.FC = () => {
         name="Settings" 
         component={SettingsScreen} 
         options={{ 
-          title: 'Settings',
+          title: t('navigation.settings'),
           headerShown: true,
         }} 
       />
@@ -113,7 +116,7 @@ const RootNavigator: React.FC = () => {
         name="Favorites" 
         component={FavoritesScreen} 
         options={{ 
-          title: 'Favorites',
+          title: t('navigation.favorites'),
           headerShown: true,
         }} 
       />
@@ -121,7 +124,7 @@ const RootNavigator: React.FC = () => {
         name="Download" 
         component={DownloadScreen} 
         options={{ 
-          title: 'Offline Content',
+          title: t('navigation.download'),
           headerShown: true,
         }} 
       />
@@ -129,7 +132,15 @@ const RootNavigator: React.FC = () => {
         name="Search" 
         component={SearchScreen} 
         options={{ 
-          title: 'Search',
+          title: t('navigation.search'),
+          headerShown: true,
+        }} 
+      />
+      <Stack.Screen 
+        name="AccessibilityTest" 
+        component={AccessibilityTest} 
+        options={{ 
+          title: 'Accessibility Test',
           headerShown: true,
         }} 
       />

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { LanguageType, SUPPORTED_LANGUAGES, getLanguageById } from '../constants/languages';
 import { storageService } from '../services/storageService';
+import { changeLanguage, getCurrentLanguageType, initializeLanguage } from '../i18n';
 
 interface LanguageContextType {
   selectedLanguage: LanguageType;
@@ -33,10 +34,12 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
   useEffect(() => {
     const loadLanguageSettings = async () => {
       try {
-        const savedLanguage = await storageService.getLanguageSettings();
-        if (savedLanguage && ['kannada', 'sanskrit', 'telugu'].includes(savedLanguage)) {
-          setSelectedLanguageState(savedLanguage as LanguageType);
-        }
+        // Initialize i18n with saved language
+        await initializeLanguage();
+        
+        // Get the current language type from i18n
+        const currentLangType = getCurrentLanguageType();
+        setSelectedLanguageState(currentLangType);
       } catch (error) {
         console.error('Failed to load language settings:', error);
       } finally {
@@ -50,11 +53,11 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
   const setSelectedLanguage = async (language: LanguageType) => {
     setSelectedLanguageState(language);
     
-    // Save to storage
+    // Change i18n language
     try {
-      await storageService.saveLanguageSettings(language);
+      await changeLanguage(language);
     } catch (error) {
-      console.error('Failed to save language settings:', error);
+      console.error('Failed to change language:', error);
     }
   };
 

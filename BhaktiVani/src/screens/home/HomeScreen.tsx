@@ -2,14 +2,17 @@ import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useTheme, Button, Card, Chip } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { useLanguageContext } from '../../contexts/LanguageContext';
 import { SUPPORTED_LANGUAGES } from '../../constants/languages';
 import FavoriteTest from '../../components/test/FavoriteTest';
+import LanguageTest from '../../components/test/LanguageTest';
 import { initializationService } from '../../services/initializationService';
 
 const HomeScreen: React.FC = () => {
   const theme = useTheme();
   const navigation = useNavigation();
+  const { t } = useTranslation();
   const { selectedLanguage, setSelectedLanguage, currentLanguage } = useLanguageContext();
 
   // Initialize app with mock data on first load
@@ -48,10 +51,10 @@ const HomeScreen: React.FC = () => {
     >
       <View style={styles.header}>
         <Text style={[styles.title, { color: theme.colors.primary }]}>
-          Welcome to BhaktiVani
+          {t('home.welcome')}
         </Text>
         <Text style={[styles.subtitle, { color: theme.colors.onSurface }]}>
-          Your gateway to Hindu devotional texts
+          {t('home.subtitle')}
         </Text>
       </View>
 
@@ -59,10 +62,10 @@ const HomeScreen: React.FC = () => {
       <Card style={[styles.card, { backgroundColor: theme.colors.surface }]}>
         <Card.Content>
           <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>
-            Select Language
+            {t('home.selectLanguage')}
           </Text>
           <Text style={[styles.sectionDescription, { color: theme.colors.onSurface }]}>
-            Choose your preferred language for reading devotional texts
+            {t('home.selectLanguageDescription')}
           </Text>
           
           <View style={styles.languageContainer}>
@@ -91,7 +94,7 @@ const HomeScreen: React.FC = () => {
           
           <View style={styles.currentLanguageInfo}>
             <Text style={[styles.currentLanguageText, { color: theme.colors.onSurface }]}>
-              Current: {currentLanguage.nativeName} ({currentLanguage.name})
+              {t('home.currentLanguage')}: {currentLanguage.nativeName} ({currentLanguage.name})
             </Text>
           </View>
         </Card.Content>
@@ -101,7 +104,7 @@ const HomeScreen: React.FC = () => {
       <Card style={[styles.card, { backgroundColor: theme.colors.surface }]}>
         <Card.Content>
           <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>
-            Quick Actions
+            {t('home.quickActions')}
           </Text>
           
           <View style={styles.actionButtons}>
@@ -112,7 +115,7 @@ const HomeScreen: React.FC = () => {
               contentStyle={styles.buttonContent}
               onPress={handleStartReading}
             >
-              Browse Library
+              {t('home.browseLibrary')}
             </Button>
             
             <Button
@@ -122,7 +125,7 @@ const HomeScreen: React.FC = () => {
               contentStyle={styles.buttonContent}
               onPress={handleViewFavorites}
             >
-              View Favorites
+              {t('home.viewFavorites')}
             </Button>
             
             <Button
@@ -132,7 +135,7 @@ const HomeScreen: React.FC = () => {
               contentStyle={styles.buttonContent}
               onPress={handleOpenSettings}
             >
-              Settings
+              {t('home.settings')}
             </Button>
             
             <Button
@@ -142,7 +145,7 @@ const HomeScreen: React.FC = () => {
               contentStyle={styles.buttonContent}
               onPress={handleOpenSearch}
             >
-              Search
+              {t('home.search')}
             </Button>
           </View>
         </Card.Content>
@@ -152,33 +155,40 @@ const HomeScreen: React.FC = () => {
       <Card style={[styles.card, { backgroundColor: theme.colors.surface }]}>
         <Card.Content>
           <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>
-            Features
+            {t('home.features')}
           </Text>
           
           <View style={styles.featuresList}>
             <Text style={[styles.feature, { color: theme.colors.onSurface }]}>
-              📖 Offline Reading - Access texts without internet
+              {t('home.offlineReading')}
             </Text>
             <Text style={[styles.feature, { color: theme.colors.onSurface }]}>
-              🌙 Dark/Light Mode - Comfortable reading in any light
+              {t('home.darkLightMode')}
             </Text>
             <Text style={[styles.feature, { color: theme.colors.onSurface }]}>
-              🔤 Multi-language Support - Kannada, Sanskrit, Telugu
+              {t('home.multiLanguageSupport')}
             </Text>
             <Text style={[styles.feature, { color: theme.colors.onSurface }]}>
-              ❤️ Favorites - Bookmark your favorite texts
+              {t('home.favorites')}
             </Text>
-                      <Text style={[styles.feature, { color: theme.colors.onSurface }]}>
-            🔊 Audio Guides - Listen to recitations
-          </Text>
-        </View>
-      </Card.Content>
+            <Text style={[styles.feature, { color: theme.colors.onSurface }]}>
+              {t('home.audioGuides')}
+            </Text>
+          </View>
+        </Card.Content>
     </Card>
 
     {/* Test Component */}
     <Card style={[styles.card, { backgroundColor: theme.colors.surface }]}>
       <Card.Content>
         <FavoriteTest />
+      </Card.Content>
+    </Card>
+
+    {/* Language Test Component */}
+    <Card style={[styles.card, { backgroundColor: theme.colors.surface }]}>
+      <Card.Content>
+        <LanguageTest />
       </Card.Content>
     </Card>
   </ScrollView>

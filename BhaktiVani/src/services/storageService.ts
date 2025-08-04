@@ -68,7 +68,7 @@ class StorageService {
   }
 
   // Theme Settings
-  async saveThemeSettings(theme: 'light' | 'dark' | 'sepia'): Promise<void> {
+  async saveThemeSettings(theme: 'light' | 'dark' | 'sepia' | 'highContrast'): Promise<void> {
     try {
       await this.init();
       await AsyncStorage.setItem('selectedTheme', theme);
@@ -77,10 +77,10 @@ class StorageService {
     }
   }
 
-  async getThemeSettings(): Promise<'light' | 'dark' | 'sepia' | null> {
+  async getThemeSettings(): Promise<'light' | 'dark' | 'sepia' | 'highContrast' | null> {
     try {
       await this.init();
-      return await AsyncStorage.getItem('selectedTheme') as 'light' | 'dark' | 'sepia' | null;
+      return await AsyncStorage.getItem('selectedTheme') as 'light' | 'dark' | 'sepia' | 'highContrast' | null;
     } catch (error) {
       console.error('Failed to get theme settings:', error);
       return null;
@@ -175,6 +175,27 @@ class StorageService {
     } catch (error) {
       console.error('Failed to get favorites:', error);
       return [];
+    }
+  }
+
+  // Accessibility Settings
+  async saveAccessibilitySettings(settings: any): Promise<void> {
+    try {
+      await this.init();
+      await AsyncStorage.setItem('accessibilitySettings', JSON.stringify(settings));
+    } catch (error) {
+      console.error('Failed to save accessibility settings:', error);
+    }
+  }
+
+  async getAccessibilitySettings(): Promise<any | null> {
+    try {
+      await this.init();
+      const settings = await AsyncStorage.getItem('accessibilitySettings');
+      return settings ? JSON.parse(settings) : null;
+    } catch (error) {
+      console.error('Failed to get accessibility settings:', error);
+      return null;
     }
   }
 
