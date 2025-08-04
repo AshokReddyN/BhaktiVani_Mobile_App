@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useTheme, Card, ActivityIndicator } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { useLanguageContext } from '../../contexts/LanguageContext';
 import { stotraService } from '../../services/stotraService';
 import StotraList from '../../components/stotra/StotraList';
@@ -9,6 +10,7 @@ import StotraList from '../../components/stotra/StotraList';
 const FavoritesScreen: React.FC = () => {
   const theme = useTheme();
   const navigation = useNavigation();
+  const { t } = useTranslation();
   const { selectedLanguage, currentLanguage } = useLanguageContext();
   const [favoriteStotras, setFavoriteStotras] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -41,7 +43,7 @@ const FavoritesScreen: React.FC = () => {
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={theme.colors.primary} />
           <Text style={[styles.loadingText, { color: theme.colors.onSurface }]}>
-            Loading favorites...
+            {t('common.loading')}
           </Text>
         </View>
       </View>
@@ -55,7 +57,7 @@ const FavoritesScreen: React.FC = () => {
     >
       <View style={styles.header}>
         <Text style={[styles.title, { color: theme.colors.primary }]}>
-          Favorites
+          {t('favorites.title')}
         </Text>
         <Text style={[styles.subtitle, { color: theme.colors.onSurface }]}>
           Your bookmarked devotional texts in {currentLanguage.nativeName}
@@ -66,7 +68,7 @@ const FavoritesScreen: React.FC = () => {
       <Card style={[styles.statsCard, { backgroundColor: theme.colors.surface }]}>
         <Card.Content>
           <Text style={[styles.statsTitle, { color: theme.colors.primary }]}>
-            Your Favorites
+            {t('favorites.title')}
           </Text>
           <View style={styles.statsRow}>
             <View style={styles.statItem}>
@@ -74,7 +76,7 @@ const FavoritesScreen: React.FC = () => {
                 {favoriteStotras.length}
               </Text>
               <Text style={[styles.statLabel, { color: theme.colors.onSurface }]}>
-                Favorites
+                {t('favorites.title')}
               </Text>
             </View>
             <View style={styles.statItem}>

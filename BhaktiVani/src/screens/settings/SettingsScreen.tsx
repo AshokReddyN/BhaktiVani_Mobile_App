@@ -1,21 +1,26 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { useTheme, List, Divider, RadioButton } from 'react-native-paper';
+import { useTheme, List, Divider, RadioButton, Switch } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { useThemeContext } from '../../constants/theme';
 import { useLanguageContext } from '../../contexts/LanguageContext';
+import { useAccessibilityContext } from '../../contexts/AccessibilityContext';
 import { SUPPORTED_LANGUAGES } from '../../constants/languages';
 
 const SettingsScreen: React.FC = () => {
   const theme = useTheme();
   const navigation = useNavigation();
+  const { t } = useTranslation();
   const { theme: currentTheme, setTheme, isDark, isSepia } = useThemeContext();
   const { selectedLanguage, setSelectedLanguage, currentLanguage } = useLanguageContext();
+  const { settings, updateSettings } = useAccessibilityContext();
 
   const themeOptions = [
-    { value: 'light', label: 'Light Mode', icon: 'white-balance-sunny', description: 'Bright theme for daytime reading' },
-    { value: 'dark', label: 'Dark Mode', icon: 'moon-waning-crescent', description: 'Dark theme for low-light environments' },
-    { value: 'sepia', label: 'Warm Mode', icon: 'palette', description: 'Sepia theme for reduced eye strain' },
+    { value: 'light', label: t('settings.lightMode'), icon: 'white-balance-sunny', description: t('settings.lightModeDescription') },
+    { value: 'dark', label: t('settings.darkMode'), icon: 'moon-waning-crescent', description: t('settings.darkModeDescription') },
+    { value: 'sepia', label: t('settings.warmMode'), icon: 'palette', description: t('settings.warmModeDescription') },
+    { value: 'highContrast', label: t('settings.highContrastMode'), icon: 'contrast', description: t('settings.highContrastModeDescription') },
   ];
 
   const handleOpenDownloadScreen = () => {
@@ -29,14 +34,14 @@ const SettingsScreen: React.FC = () => {
     >
       <View style={styles.header}>
         <Text style={[styles.title, { color: theme.colors.primary }]}>
-          Settings
+          {t('settings.title')}
         </Text>
       </View>
 
       {/* Theme Settings */}
       <View style={[styles.section, { backgroundColor: theme.colors.surface }]}>
         <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>
-          Appearance
+          {t('settings.appearance')}
         </Text>
         
         {themeOptions.map((option) => (
@@ -72,15 +77,93 @@ const SettingsScreen: React.FC = () => {
 
       <Divider style={styles.divider} />
 
-      {/* Offline Content Settings */}
+      {/* Accessibility Settings */}
       <View style={[styles.section, { backgroundColor: theme.colors.surface }]}>
         <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>
-          Offline Content
+          {t('settings.accessibility')}
         </Text>
         
         <List.Item
-          title="Download Content"
-          description="Download stotras for offline reading"
+          title={t('settings.highContrast')}
+          description={t('settings.highContrastDescription')}
+          left={(props) => <List.Icon {...props} icon="contrast" />}
+          right={() => (
+            <Switch
+              value={settings.isHighContrastEnabled}
+              onValueChange={(value) => updateSettings({ isHighContrastEnabled: value })}
+              color={theme.colors.primary}
+            />
+          )}
+          titleStyle={[styles.listItemTitle, { color: theme.colors.onSurface }]}
+          descriptionStyle={[styles.listItemDescription, { color: theme.colors.onSurface }]}
+        />
+
+        <List.Item
+          title={t('settings.largeText')}
+          description={t('settings.largeTextDescription')}
+          left={(props) => <List.Icon {...props} icon="format-size" />}
+          right={() => (
+            <Switch
+              value={settings.isLargeTextEnabled}
+              onValueChange={(value) => updateSettings({ isLargeTextEnabled: value })}
+              color={theme.colors.primary}
+            />
+          )}
+          titleStyle={[styles.listItemTitle, { color: theme.colors.onSurface }]}
+          descriptionStyle={[styles.listItemDescription, { color: theme.colors.onSurface }]}
+        />
+
+        <List.Item
+          title={t('settings.increasedPadding')}
+          description={t('settings.increasedPaddingDescription')}
+          left={(props) => <List.Icon {...props} icon="space-bar" />}
+          right={() => (
+            <Switch
+              value={settings.isIncreasedPaddingEnabled}
+              onValueChange={(value) => updateSettings({ isIncreasedPaddingEnabled: value })}
+              color={theme.colors.primary}
+            />
+          )}
+          titleStyle={[styles.listItemTitle, { color: theme.colors.onSurface }]}
+          descriptionStyle={[styles.listItemDescription, { color: theme.colors.onSurface }]}
+        />
+
+        <List.Item
+          title={t('settings.systemFontScaling')}
+          description={t('settings.systemFontScalingDescription')}
+          left={(props) => <List.Icon {...props} icon="text" />}
+          right={() => (
+            <Switch
+              value={settings.isSystemFontScalingEnabled}
+              onValueChange={(value) => updateSettings({ isSystemFontScalingEnabled: value })}
+              color={theme.colors.primary}
+            />
+          )}
+          titleStyle={[styles.listItemTitle, { color: theme.colors.onSurface }]}
+          descriptionStyle={[styles.listItemDescription, { color: theme.colors.onSurface }]}
+        />
+
+        <List.Item
+          title="Test Accessibility Features"
+          description="Open accessibility test screen to verify features"
+          left={(props) => <List.Icon {...props} icon="test-tube" />}
+          onPress={() => navigation.navigate('AccessibilityTest' as never)}
+          titleStyle={[styles.listItemTitle, { color: theme.colors.onSurface }]}
+          descriptionStyle={[styles.listItemDescription, { color: theme.colors.onSurface }]}
+        />
+      </View>
+
+      <Divider style={styles.divider} />
+
+      {/* Offline Content Settings */}
+      <View style={[styles.section, { backgroundColor: theme.colors.surface }]}>
+        <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>
+          {t('settings.offlineContent')}
+        </Text>
+        
+        <List.Item
+          title={t('settings.downloadContent')}
+          description={t('settings.downloadContentDescription')}
           left={(props) => <List.Icon {...props} icon="download" />}
           onPress={handleOpenDownloadScreen}
           titleStyle={[styles.listItemTitle, { color: theme.colors.onSurface }]}
@@ -93,11 +176,11 @@ const SettingsScreen: React.FC = () => {
       {/* Language Settings */}
       <View style={[styles.section, { backgroundColor: theme.colors.surface }]}>
         <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>
-          Language
+          {t('settings.language')}
         </Text>
         
         <Text style={[styles.currentLanguage, { color: theme.colors.onSurface }]}>
-          Current: {currentLanguage.nativeName} ({currentLanguage.name})
+          {t('home.currentLanguage')}: {currentLanguage.nativeName} ({currentLanguage.name})
         </Text>
 
         {SUPPORTED_LANGUAGES.map((language) => (
@@ -129,20 +212,20 @@ const SettingsScreen: React.FC = () => {
       {/* App Info */}
       <View style={[styles.section, { backgroundColor: theme.colors.surface }]}>
         <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>
-          About
+          {t('settings.about')}
         </Text>
         
         <List.Item
-          title="BhaktiVani"
-          description="Version 1.0.0"
+          title={t('settings.appName')}
+          description={t('settings.version')}
           left={(props) => <List.Icon {...props} icon="information" />}
           titleStyle={[styles.listItemTitle, { color: theme.colors.onSurface }]}
           descriptionStyle={[styles.listItemDescription, { color: theme.colors.onSurface }]}
         />
         
         <List.Item
-          title="Offline Access"
-          description="All texts available offline"
+          title={t('settings.offlineAccess')}
+          description={t('settings.offlineAccessDescription')}
           left={(props) => <List.Icon {...props} icon="wifi-off" />}
           titleStyle={[styles.listItemTitle, { color: theme.colors.onSurface }]}
           descriptionStyle={[styles.listItemDescription, { color: theme.colors.onSurface }]}

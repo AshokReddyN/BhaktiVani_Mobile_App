@@ -68,7 +68,7 @@ class StorageService {
   }
 
   // Theme Settings
-  async saveThemeSettings(theme: 'light' | 'dark' | 'sepia'): Promise<void> {
+  async saveThemeSettings(theme: 'light' | 'dark' | 'sepia' | 'highContrast'): Promise<void> {
     try {
       await this.init();
       await AsyncStorage.setItem('selectedTheme', theme);
@@ -77,10 +77,10 @@ class StorageService {
     }
   }
 
-  async getThemeSettings(): Promise<'light' | 'dark' | 'sepia' | null> {
+  async getThemeSettings(): Promise<'light' | 'dark' | 'sepia' | 'highContrast' | null> {
     try {
       await this.init();
-      return await AsyncStorage.getItem('selectedTheme') as 'light' | 'dark' | 'sepia' | null;
+      return await AsyncStorage.getItem('selectedTheme') as 'light' | 'dark' | 'sepia' | 'highContrast' | null;
     } catch (error) {
       console.error('Failed to get theme settings:', error);
       return null;
@@ -110,6 +110,53 @@ class StorageService {
     }
   }
 
+  // Language-specific Reading Position
+  async saveReadingPosition(stotraId: string, language: string, position: number): Promise<void> {
+    try {
+      await this.init();
+      const key = `readingPosition_${language}_${stotraId}`;
+      await AsyncStorage.setItem(key, position.toString());
+    } catch (error) {
+      console.error('Failed to save reading position:', error);
+    }
+  }
+
+  async getReadingPosition(stotraId: string, language: string): Promise<number> {
+    try {
+      await this.init();
+      const key = `readingPosition_${language}_${stotraId}`;
+      const position = await AsyncStorage.getItem(key);
+      return position ? parseInt(position, 10) : 0;
+    } catch (error) {
+      console.error('Failed to get reading position:', error);
+      return 0;
+    }
+  }
+
+  // Get all reading positions for a language
+  async getLanguageReadingPositions(language: string): Promise<Record<string, number>> {
+    try {
+      await this.init();
+      const keys = await AsyncStorage.getAllKeys();
+      const languagePositionKeys = keys.filter(key => key.startsWith(`readingPosition_${language}_`));
+      
+      const positions: Record<string, number> = {};
+      
+      for (const key of languagePositionKeys) {
+        const stotraId = key.replace(`readingPosition_${language}_`, '');
+        const position = await AsyncStorage.getItem(key);
+        if (position) {
+          positions[stotraId] = parseInt(position, 10);
+        }
+      }
+      
+      return positions;
+    } catch (error) {
+      console.error('Failed to get language reading positions:', error);
+      return {};
+    }
+  }
+
   // Favorites
   async saveFavorites(favorites: string[]): Promise<void> {
     try {
@@ -128,6 +175,27 @@ class StorageService {
     } catch (error) {
       console.error('Failed to get favorites:', error);
       return [];
+    }
+  }
+
+  // Accessibility Settings
+  async saveAccessibilitySettings(settings: any): Promise<void> {
+    try {
+      await this.init();
+      await AsyncStorage.setItem('accessibilitySettings', JSON.stringify(settings));
+    } catch (error) {
+      console.error('Failed to save accessibility settings:', error);
+    }
+  }
+
+  async getAccessibilitySettings(): Promise<any | null> {
+    try {
+      await this.init();
+      const settings = await AsyncStorage.getItem('accessibilitySettings');
+      return settings ? JSON.parse(settings) : null;
+    } catch (error) {
+      console.error('Failed to get accessibility settings:', error);
+      return null;
     }
   }
 

@@ -8,12 +8,15 @@ import { store } from './src/store';
 import { ThemeProvider, useThemeContext, getCurrentTheme } from './src/constants/theme';
 import { LanguageProvider } from './src/contexts/LanguageContext';
 import { ReaderProvider } from './src/contexts/ReaderContext';
+import { AccessibilityProvider, useAccessibilityContext } from './src/contexts/AccessibilityContext';
 import { offlineService } from './src/services/offlineService';
 import RootNavigator from './src/navigation/RootNavigator';
+import './src/i18n'; // Initialize i18n
 
 const AppContent: React.FC = () => {
   const { theme, isDark } = useThemeContext();
-  const currentTheme = getCurrentTheme(theme);
+  const { settings } = useAccessibilityContext();
+  const currentTheme = getCurrentTheme(theme, settings.isHighContrastEnabled);
 
   useEffect(() => {
     // Initialize offline service
@@ -47,7 +50,9 @@ export default function App() {
       <ThemeProvider>
         <LanguageProvider>
           <ReaderProvider>
-            <AppContent />
+            <AccessibilityProvider>
+              <AppContent />
+            </AccessibilityProvider>
           </ReaderProvider>
         </LanguageProvider>
       </ThemeProvider>

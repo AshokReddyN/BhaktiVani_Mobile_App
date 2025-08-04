@@ -7,56 +7,67 @@ export const colors = {
     light: '#FF6B35',
     dark: '#FF8A65',
     sepia: '#A97142',
+    highContrast: '#FF0000',
   },
   secondary: {
     light: '#4A90E2',
     dark: '#64B5F6',
     sepia: '#C9A66B',
+    highContrast: '#00FF00',
   },
   background: {
     light: '#FFFFFF',
     dark: '#121212',
     sepia: '#F4ECD8',
+    highContrast: '#000000',
   },
   surface: {
     light: '#F5F5F5',
     dark: '#1E1E1E',
     sepia: '#E9DFCA',
+    highContrast: '#000000',
   },
   text: {
     light: '#212121',
     dark: '#FFFFFF',
     sepia: '#5B4636',
+    highContrast: '#FFFFFF',
   },
   textSecondary: {
     light: '#757575',
     dark: '#B0B0B0',
     sepia: '#A97142',
+    highContrast: '#FFFFFF',
   },
   accent: {
     light: '#FFD700',
     dark: '#FFEB3B',
     sepia: '#FFD180',
+    highContrast: '#FFFF00',
   },
   error: {
     light: '#F44336',
     dark: '#EF5350',
     sepia: '#B85C38',
+    highContrast: '#FF0000',
   },
   success: {
     light: '#4CAF50',
     dark: '#66BB6A',
     sepia: '#A3B18A',
+    highContrast: '#00FF00',
   },
   warning: {
     light: '#FF9800',
     dark: '#FFB74D',
     sepia: '#FFB74D',
+    highContrast: '#FFFF00',
   },
   info: {
     light: '#2196F3',
     dark: '#42A5F5',
     sepia: '#A1C6EA',
+    highContrast: '#00FFFF',
   },
 };
 
@@ -181,8 +192,27 @@ export const sepiaTheme = {
   },
 };
 
+export const highContrastTheme = {
+  ...MD3DarkTheme,
+  colors: {
+    ...MD3DarkTheme.colors,
+    primary: colors.primary.highContrast,
+    secondary: colors.secondary.highContrast,
+    background: colors.background.highContrast,
+    surface: colors.surface.highContrast,
+    text: colors.text.highContrast,
+    onSurface: colors.text.highContrast,
+    onBackground: colors.text.highContrast,
+    accent: colors.accent.highContrast,
+    error: colors.error.highContrast,
+    success: colors.success.highContrast,
+    warning: colors.warning.highContrast,
+    info: colors.info.highContrast,
+  },
+};
+
 // Theme Context
-type ThemeType = 'light' | 'dark' | 'sepia';
+type ThemeType = 'light' | 'dark' | 'sepia' | 'highContrast';
 
 interface ThemeContextType {
   theme: ThemeType;
@@ -190,6 +220,7 @@ interface ThemeContextType {
   toggleTheme: () => void;
   isDark: boolean;
   isSepia: boolean;
+  isHighContrast: boolean;
   isLoading: boolean;
 }
 
@@ -216,7 +247,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     const loadThemeSettings = async () => {
       try {
         const savedTheme = await storageService.getThemeSettings();
-        if (savedTheme === 'light' || savedTheme === 'dark' || savedTheme === 'sepia') {
+        if (savedTheme === 'light' || savedTheme === 'dark' || savedTheme === 'sepia' || savedTheme === 'highContrast') {
           setThemeState(savedTheme);
         }
       } catch (error) {
@@ -240,17 +271,19 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     }
   };
 
-  // Cycles through light -> dark -> sepia -> light
+  // Cycles through light -> dark -> sepia -> highContrast -> light
   const toggleTheme = async () => {
     let newTheme: ThemeType;
     if (theme === 'light') newTheme = 'dark';
     else if (theme === 'dark') newTheme = 'sepia';
+    else if (theme === 'sepia') newTheme = 'highContrast';
     else newTheme = 'light';
     await setTheme(newTheme);
   };
 
   const isDark = theme === 'dark';
   const isSepia = theme === 'sepia';
+  const isHighContrast = theme === 'highContrast';
 
   const value = {
     theme,
@@ -258,14 +291,21 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     toggleTheme,
     isDark,
     isSepia,
+    isHighContrast,
     isLoading,
   };
 
   return React.createElement(ThemeContext.Provider, { value }, children);
 };
 
-export const getCurrentTheme = (theme: ThemeType) => {
+export const getCurrentTheme = (theme: ThemeType, isHighContrastEnabled: boolean = false) => {
+  // If high contrast is enabled, use high contrast theme regardless of base theme
+  if (isHighContrastEnabled) {
+    return highContrastTheme;
+  }
+  
   if (theme === 'dark') return darkTheme;
   if (theme === 'sepia') return sepiaTheme;
+  if (theme === 'highContrast') return highContrastTheme;
   return lightTheme;
 }; 
