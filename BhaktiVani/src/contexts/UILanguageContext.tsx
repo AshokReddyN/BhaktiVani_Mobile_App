@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { UILanguageType, SUPPORTED_UI_LANGUAGES, getUILanguageById } from '../constants/languages';
 import { storageService } from '../services/storageService';
-import { changeUILanguage, getCurrentUILanguageType, initializeLanguage } from '../i18n';
+import { changeUILanguage, getCurrentUILanguageType } from '../i18n';
 
 interface UILanguageContextType {
   selectedUILanguage: UILanguageType;
@@ -30,26 +30,19 @@ export const UILanguageProvider: React.FC<UILanguageProviderProps> = ({ children
 
   const currentUILanguage = getUILanguageById(selectedUILanguage);
 
-  // Load UI language settings from storage on mount
+  // Get current UI language on mount (i18n is already initialized)
   useEffect(() => {
-    const loadUILanguageSettings = async () => {
-      try {
-        // Initialize i18n with saved UI language
-        await initializeLanguage();
-        
-        // Get the current UI language type from i18n
-        const currentUILangType = getCurrentUILanguageType();
-        setSelectedUILanguageState(currentUILangType);
-      } catch (error) {
-        console.error('Failed to load UI language settings:', error);
-        // Default to English on error
-        setSelectedUILanguageState('english');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadUILanguageSettings();
+    try {
+      // Get the current UI language type from i18n
+      const currentUILangType = getCurrentUILanguageType();
+      setSelectedUILanguageState(currentUILangType);
+    } catch (error) {
+      console.error('Failed to get current UI language:', error);
+      // Default to English on error
+      setSelectedUILanguageState('english');
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   const setSelectedUILanguage = async (language: UILanguageType) => {
