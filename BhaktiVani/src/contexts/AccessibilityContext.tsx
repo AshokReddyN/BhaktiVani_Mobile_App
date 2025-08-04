@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { AccessibilityInfo, PixelRatio } from 'react-native';
 import { storageService } from '../services/storageService';
 
@@ -104,7 +104,7 @@ export const AccessibilityProvider: React.FC<AccessibilityProviderProps> = ({ ch
     return Math.round(scaledSize);
   };
 
-  const getScaledPadding = (basePadding: number): number => {
+  const getScaledPadding = useCallback((basePadding: number): number => {
     let scaledPadding = basePadding;
 
     // Apply custom padding multiplier
@@ -113,7 +113,7 @@ export const AccessibilityProvider: React.FC<AccessibilityProviderProps> = ({ ch
     }
 
     return Math.round(scaledPadding);
-  };
+  }, [settings.isIncreasedPaddingEnabled, settings.customPadding]);
 
   const value = {
     settings,

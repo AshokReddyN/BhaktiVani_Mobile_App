@@ -1,4 +1,5 @@
 import React from 'react';
+import { Easing } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
@@ -16,10 +17,12 @@ import AccessibilityTest from '../components/test/AccessibilityTest';
 
 const Stack = createStackNavigator();
 
+const transitionEasing = Easing.inOut(Easing.ease);
+
 const RootNavigator: React.FC = () => {
   const theme = useTheme();
   const { t } = useTranslation();
-  const { theme: currentTheme, isDark, isSepia } = useThemeContext();
+  const { isDark, isSepia } = useThemeContext();
 
   // Determine header style based on theme
   const getHeaderStyle = () => {
@@ -67,14 +70,14 @@ const RootNavigator: React.FC = () => {
             animation: 'timing',
             config: {
               duration: 300,
-              easing: require('react-native').Easing.inOut(require('react-native').Easing.ease),
+              easing: transitionEasing,
             },
           },
           close: {
             animation: 'timing',
             config: {
               duration: 300,
-              easing: require('react-native').Easing.inOut(require('react-native').Easing.ease),
+              easing: transitionEasing,
             },
           },
         },
