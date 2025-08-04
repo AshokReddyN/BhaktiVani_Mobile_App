@@ -38,6 +38,16 @@ const ReaderContent: React.FC<ReaderContentProps> = ({
   const { settings } = useReaderContext();
   const { isDark, isSepia } = useThemeContext();
   const { getScaledFontSize, getScaledPadding } = useAccessibilityContext();
+
+  const dynamicStyles = {
+    contentContainer: {
+      padding: getScaledPadding(20),
+      paddingBottom: getScaledPadding(40),
+    },
+    contentBlock: {
+      marginBottom: getScaledPadding(16),
+    },
+  };
   
   const scrollViewRef = useRef<ScrollView>(null);
   const [scrollPosition, setScrollPosition] = useState(initialScrollPosition);
@@ -173,7 +183,7 @@ const ReaderContent: React.FC<ReaderContentProps> = ({
     const isBookmarked = bookmarks.includes(index);
 
     return (
-      <View key={index} style={styles.contentBlock}>
+      <View key={index} style={[styles.contentBlock, dynamicStyles.contentBlock]}>
         {activeSettings.showLineNumbers && (
           <Text style={[styles.lineNumber, { color: theme.colors.onSurface }]}>
             {lineNumber}
@@ -239,7 +249,7 @@ const ReaderContent: React.FC<ReaderContentProps> = ({
       <ScrollView 
         ref={scrollViewRef}
         style={styles.scrollView}
-        contentContainerStyle={styles.contentContainer}
+        contentContainerStyle={[styles.contentContainer, dynamicStyles.contentContainer]}
         showsVerticalScrollIndicator={false}
         onScroll={handleScroll}
         scrollEventThrottle={16}
@@ -328,8 +338,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentContainer: {
-    padding: getScaledPadding(20),
-    paddingBottom: getScaledPadding(40),
+    // padding and paddingBottom are now dynamic
   },
   titleSection: {
     marginBottom: 32,
@@ -351,7 +360,7 @@ const styles = StyleSheet.create({
   },
   contentBlock: {
     flexDirection: 'row',
-    marginBottom: getScaledPadding(16),
+    // marginBottom is now dynamic
     alignItems: 'flex-start',
   },
   lineNumber: {
